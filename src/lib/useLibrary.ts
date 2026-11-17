@@ -32,6 +32,11 @@ export function useLibrary() {
   const [launch, setLaunch] = useState<LaunchState>(null);
   const [running, setRunning] = useState<string[]>([]);
   const [filter, setFilter] = useState<Filter>("all");
+  /** game key -> [enabled, total] mods (hand-installed + Saha). */
+  const [modCounts, setModCounts] = useState<Record<string, [number, number]>>({});
+  const refreshModCounts = useCallback(() => {
+    api.modsCounts().then(setModCounts).catch(() => {});
+  }, []);
 
   const fetchArt = useCallback(() => {
     api.fetchArt().then((art) => setLib((l) => ({ ...l, art }))).catch(() => {});
@@ -43,12 +48,13 @@ export function useLibrary() {
       setLib(await api.scanLibrary());
       setError("");
       fetchArt(); // covers in the background
+      refreshModCounts(); // detect installed mods for every game
     } catch (e) {
       setError(String(e));
     } finally {
       setScanning(false);
     }
-  }, [fetchArt]);
+  }, [fetchArt, refreshModCounts]);
 
   useEffect(() => {
     api
@@ -113,7 +119,7 @@ export function useLibrary() {
   }, []);
 
   return {
-    lib, syncOwned, notify, settings, scanning, error, launch, running, filter,
+    lib, syncOwned, notify, modCounts, refreshModCounts, settings, scanning, error, launch, running, filter,
     setFilter, rescan, saveSettings, toggleIn, play, fetchArt,
     dismissLaunch: () => setLaunch(null),
   };

@@ -29,13 +29,14 @@ export default function Mods({ store, nav }: { store: Store; nav: Nav }) {
       <div className="grid">
         {games.map((g) => {
           const n = byGame(g.key);
+          const c = store.modCounts[g.key];
           return (
-            <div key={g.key} className="gc" onClick={() => nav.go({ page: "game", key: g.key, title: g.title, tab: n.length ? "installed" : "mods" })}>
+            <div key={g.key} className="gc" onClick={() => nav.go({ page: "game", key: g.key, title: g.title, tab: c || n.length ? "installed" : "mods" })}>
               <Art game={g} kind="cover" art={store.lib.art[g.key]} custom={store.settings.customCovers[g.key]} className="poster">
-                {n.length > 0 && <span className="st"><Icon name="puzzle" size={12} /> {num(n.filter((m) => m.enabled).length)}/{num(n.length)}</span>}
+                {c && <span className="st"><Icon name="puzzle" size={12} /> {num(c[0])}/{num(c[1])}</span>}
               </Art>
               <b className="en">{g.title}</b>
-              <small>{n.length ? `${num(n.length)} مود` : "تصفح المودات"}</small>
+              <small>{c ? `${num(c[1])} مود مركّب` : "تصفح المودات"}</small>
             </div>
           );
         })}

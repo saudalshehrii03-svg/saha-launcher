@@ -90,6 +90,8 @@ pub fn sync_owned(accounts: &[Account]) -> Result<usize> {
 #[serde(rename_all = "camelCase")]
 pub struct Deal {
     pub store: String,
+    /// "official" (the publisher/platform store) or "authorized" (licensed reseller).
+    pub trust: String,
     pub price: String,
     pub retail: String,
     pub savings: u32,
@@ -163,7 +165,32 @@ fn store_names(a: &ureq::Agent) -> &'static HashMap<String, String> {
     })
 }
 
-/// Cheapest offers from trusted stores (CheapShark only lists authorized sellers).
+/// Only these stores are shown: platform stores and well-known licensed resellers.
+/// (CheapShark already excludes grey-market key sites like G2A/Kinguin; this list is stricter.)
+const TRUSTED: &[(&str, &str)] = &[
+    ("Steam", "official"),
+    ("GOG", "official"),
+    ("Epic Games Store", "official"),
+    ("Ubisoft Store", "official"),
+    ("Uplay", "official"),
+    ("Origin", "official"),
+    ("EA", "official"),
+    ("Blizzard Shop", "official"),
+    ("Humble Store", "authorized"),
+    ("Fanatical", "authorized"),
+    ("GreenManGaming", "authorized"),
+    ("GamersGate", "authorized"),
+    ("Gamesplanet", "authorized"),
+    ("WinGameStore", "authorized"),
+    ("IndieGala Store", "authorized"),
+    ("GameBillet", "authorized"),
+];
+
+fn trust(store: &str) -> Option<&'static str> {
+    TRUSTED.iter().find(|(name, _)| store.starts_with(name)).map(|(_, t)| *t)
+}
+
+/// Cheapest offers from trusted stores only.
 fn deals(a: &ureq::Agent, steam_id: Option<u64>, title: &str) -> Vec<Deal> {
     let found = match steam_id {
         Some(id) => get_json(a, "https://www.cheapshark.com/api/1.0/games", &[("steamAppID", &id.to_string())]),
@@ -178,8 +205,11 @@ fn deals(a: &ureq::Agent, steam_id: Option<u64>, title: &str) -> Vec<Deal> {
             d.iter()
                 .filter_map(|x| {
                     let deal = x["dealID"].as_str()?;
+                    let store = stores.get(x["storeID"].as_str()?)?.clone();
+                    let trust = trust(&store)?.to_string();
                     Some(Deal {
-                        store: stores.get(x["storeID"].as_str()?).cloned().unwrap_or_else(|| "متجر".into()),
+                        store,
+                        trust,
                         price: format!("${}", x["price"].as_str()?),
                         retail: format!("${}", x["retailPrice"].as_str().unwrap_or("")),
                         savings: x["savings"].as_str().and_then(|s| s.parse::<f64>().ok()).unwrap_or(0.0).round() as u32,

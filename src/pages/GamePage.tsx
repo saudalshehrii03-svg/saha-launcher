@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Art, Badge, Icon, ImagePick } from "../components/ui";
 import { api, mediaUrl, nexusGames } from "../lib/api";
 import { ago, gb, hours, num } from "../lib/platforms";
-import type { Details, Game, InstalledMod, ModInfo, ModSupport } from "../lib/types";
+import type { Details, ExternalMod, Game, InstalledMod, ModInfo, ModSupport } from "../lib/types";
 import type { Store } from "../lib/useLibrary";
 import type { Nav, View } from "../App";
 
@@ -16,6 +16,7 @@ export default function GamePage({ store, nav, view, game }: { store: Store; nav
   const [details, setDetails] = useState<Details | null>(null);
   const [support, setSupport] = useState<ModSupport | null>(null);
   const [installed, setInstalled] = useState<InstalledMod[]>([]);
+  const [external, setExternal] = useState<ExternalMod[]>([]);
   const [openMod, setOpenMod] = useState<ModInfo | null>(null);
 
   useEffect(() => {
@@ -27,7 +28,9 @@ export default function GamePage({ store, nav, view, game }: { store: Store; nav
   }, [title, steamId, game]);
 
   const refreshInstalled = useCallback(() => {
-    if (game) api.modsInstalled().then((all) => setInstalled(all.filter((m) => m.gameKey === game.key)));
+    if (!game) return;
+    api.modsInstalled().then((all) => setInstalled(all.filter((m) => m.gameKey === game.key)));
+    if (game.installed) api.modsExternal(game.key).then(setExternal).catch(() => setExternal([]));
   }, [game]);
   useEffect(refreshInstalled, [refreshInstalled, store.launch?.status]);
 
@@ -87,7 +90,7 @@ export default function GamePage({ store, nav, view, game }: { store: Store; nav
       </div>
 
       <div className="tabs glass">
-        {([["info", "معلومات"], ["mods", "تصفح المودات"], ["installed", `المودات المثبتة${installed.length ? ` · ${num(installed.length)}` : ""}`]] as [Tab, string][]).map(([id, label]) => (
+        {([["info", "معلومات"], ["mods", "تصفح المودات"], ["installed", `المودات المثبتة${installed.length + external.length ? ` · ${num(installed.length + external.length)}` : ""}`]] as [Tab, string][]).map(([id, label]) => (
           <button key={id} className={tab === id ? "on" : ""} onClick={() => { setTab(id); setOpenMod(null); }}>{label}</button>
         ))}
       </div>
@@ -96,7 +99,7 @@ export default function GamePage({ store, nav, view, game }: { store: Store; nav
         {tab === "info" && <Info details={details} game={game} store={store} />}
         {tab === "mods" && !openMod && <ModBrowser support={support} onOpen={setOpenMod} />}
         {tab === "mods" && openMod && <ModView gameTitle={title} mod={openMod} game={game} store={store} support={support} installed={installed} onDone={refreshInstalled} />}
-        {tab === "installed" && <Installed mods={installed} store={store} onChange={refreshInstalled} game={game} />}
+        {tab === "installed" && <Installed mods={installed} external={external} store={store} onChange={refreshInstalled} game={game} />}
       </div>
     </section>
   );
@@ -128,13 +131,13 @@ function Info({ details, game, store }: { details: Details | null; game?: Game; 
             <h4><Icon name="tag" size={18} /> أرخص المتاجر الموثوقة</h4>
             {details.deals.map((d) => (
               <button key={d.url} className="deal" onClick={() => api.openExternal(d.url)}>
-                <span>{d.store}</span>
+                <span>{d.store} <em className={"trust " + d.trust}>{d.trust === "official" ? "رسمي" : "موزّع معتمد"}</em></span>
                 {d.savings > 0 && <span className="off-badge">-{d.savings}%</span>}
                 <b className="en">{d.price}</b>
                 <Icon name="external" size={15} />
               </button>
             ))}
-            <small className="hint">الأسعار بالدولار من متاجر رسمية معتمدة (عبر CheapShark).{details.price ? ` سعر ستيم السعودي: ${details.price}` : ""}</small>
+            <small className="hint">نعرض بس المتاجر الرسمية والموزّعين المعتمدين من الناشرين، ونستبعد مواقع المفاتيح المشبوهة. الأسعار بالدولار.{details.price ? ` سعر ستيم السعودي: ${details.price}` : ""}</small>
           </div>
         )}
         {details.awards.length > 0 && (
@@ -324,12 +327,41 @@ function ModView({ gameTitle, mod, game, store, support, installed, onDone }: { 
   );
 }
 
-function Installed({ mods, store, onChange, game }: { mods: InstalledMod[]; store: Store; onChange: () => void; game?: Game }) {
+const KIND: Record<ExternalMod["kind"], string> = { loader: "محمّل", mod: "مود", graphics: "رسوميات" };
+
+function Installed({ mods, external, store, onChange, game }: { mods: InstalledMod[]; external: ExternalMod[]; store: Store; onChange: () => void; game?: Game }) {
   const act = (p: Promise<unknown>, done: string) =>
-    p.then(() => { store.notify(game?.key ?? "mods", done, "done"); onChange(); }).catch((e) => store.notify(game?.key ?? "mods", String(e), "error"));
+    p.then(() => { store.notify(game?.key ?? "mods", done, "done"); onChange(); store.refreshModCounts(); }).catch((e) => store.notify(game?.key ?? "mods", String(e), "error"));
   if (!game) return <div className="notice">المودات المثبتة تظهر للألعاب اللي في مكتبتك.</div>;
-  if (mods.length === 0) return <div className="notice">ما فيه مودات مثبتة. تصفّح المودات وثبّت بضغطة.</div>;
+  if (mods.length === 0 && external.length === 0) return <div className="notice">ما فيه مودات مركّبة. تصفّح المودات وثبّت بضغطة.</div>;
   return (
+    <>
+    {external.length > 0 && (
+      <>
+        <h3 className="sub-title">مودات ركّبتها بنفسك <small className="hint">اكتشفتها ساحة تلقائياً. التعطيل ينقلها لمجلد جانبي داخل اللعبة بدون حذف.</small></h3>
+        <div className="installed-list">
+          {external.map((m) => (
+            <div key={m.id} className={"im glass " + (m.enabled ? "" : "off")}>
+              <span className={"kind-badge " + m.kind}>{KIND[m.kind]}</span>
+              <div className="im-tx">
+                <b className="en">{m.name}</b>
+                <small className="en path-line">{m.paths.join("  ·  ")}</small>
+              </div>
+              <label className="ban">
+                <span>{m.enabled ? "مفعّل" : "معطّل"}</span>
+                <button className={"tg " + (m.enabled ? "on" : "")} onClick={() => act(api.modExternalToggle(game.key, m.id, !m.enabled), m.enabled ? "تم التعطيل (الملفات محفوظة جنب اللعبة)" : "تم التفعيل")} />
+              </label>
+              {game.installDir && (
+                <button className="icon-btn glass sm" title="افتح مجلد اللعبة" onClick={() => api.openFolder(game.installDir!)}>
+                  <Icon name="external" size={16} />
+                </button>
+              )}
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+    {mods.length > 0 && <h3 className="sub-title">مودات ثبّتها ساحة</h3>}
     <div className="installed-list">
       {mods.map((m) => (
         <div key={m.id} className={`im glass ${m.enabled ? "" : "off"}`}>
@@ -348,5 +380,6 @@ function Installed({ mods, store, onChange, game }: { mods: InstalledMod[]; stor
         </div>
       ))}
     </div>
+    </>
   );
 }

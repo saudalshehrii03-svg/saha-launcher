@@ -75,3 +75,15 @@ button.stat { text-align: start; cursor: pointer; }
 .video:hover img { transform: scale(1.04); }
 .vplay { position: absolute; top: 50%; left: 50%; width: 52px; height: 52px; margin: -26px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); box-shadow: 0 8px 24px -6px var(--accent); }
 .vtitle { position: absolute; inset: auto 0 0; padding: 22px 12px 10px; font-size: 13px; background: linear-gradient(0deg, rgba(0, 0, 0, 0.85), transparent); }
+
+/* detected mods */
+.mod-badge { position: absolute; z-index: 2; bottom: 8px; right: 8px; display: flex; align-items: center; gap: 4px; font-size: 11px; padding: 3px 7px; border-radius: 8px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(8px); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 40%, transparent); }
+.gc:hover .mod-badge { opacity: 0; }
+.sub-title { font-size: 16px; margin: 18px 0 10px; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.kind-badge { font-size: 11px; padding: 4px 9px; border-radius: 8px; background: rgba(255, 255, 255, 0.07); flex: none; }
+.kind-badge.loader { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18); }
+.kind-badge.mod { box-shadow: inset 0 -2px 0 var(--accent); }
+.kind-badge.graphics { box-shadow: inset 0 -2px 0 #7aa2ff; }
+.path-line { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: ltr; text-align: right; font-size: 11.5px; }
+.trust { font-style: normal; font-size: 10.5px; padding: 1px 6px; border-radius: 6px; margin-inline-start: 6px; background: rgba(255, 255, 255, 0.07); color: var(--muted); }
+.trust.official { color: #3dff8a; background: rgba(61, 255, 138, 0.1); }

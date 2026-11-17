@@ -177,6 +177,11 @@ function GameCard({ game: g, store, busy, index, onOpen }: { game: Game; store: 
       <Art game={g} kind="cover" art={lib.art[g.key]} custom={settings.customCovers[g.key]} className="poster" onClick={onOpen}>
         <span className="pf"><Badge platform={g.platform} /></span>
         {g.guarded && <span className="guard" title="محمية بقاعدة الحساب المحظور"><Icon name="shield" size={14} /></span>}
+        {store.modCounts[g.key] && (
+          <span className="mod-badge" title="مودات مركّبة (مفعّلة/الكل)">
+            <Icon name="puzzle" size={12} /> {num(store.modCounts[g.key][0])}/{num(store.modCounts[g.key][1])}
+          </span>
+        )}
         <div className="card-actions" onClick={(e) => e.stopPropagation()}>
           <button className={fav ? "on" : ""} onClick={() => toggleIn("favorites", g.key)} title={fav ? "إزالة من المفضلة" : "إضافة للمفضلة"}>
             <Icon name={fav ? "heart-on" : "heart"} size={15} />

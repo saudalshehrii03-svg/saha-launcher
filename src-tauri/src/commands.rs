@@ -207,3 +207,51 @@ pub fn open_external(url: String) -> Result<()> {
 pub async fn mod_explain(name: String, game: String, summary: String, description: String) -> Result<mods::explain::Explain> {
     blocking(move || mods::explain::explain(&name, &game, &summary, &description)).await
 }
+
+fn installed_dir(key: &str) -> Result<(String, String)> {
+    let lib = library::scan();
+    let Some(g) = lib.games.into_iter().find(|g| g.key == key && g.installed) else { return msg("اللعبة غير مثبتة.") };
+    let Some(dir) = g.install_dir else { return msg("مسار اللعبة غير معروف.") };
+    Ok((g.key, dir))
+}
+
+/// Mods the user installed by hand (detected automatically).
+#[tauri::command]
+pub async fn mods_external(game_key: String) -> Result<Vec<mods::detect::ExternalMod>> {
+    blocking(move || {
+        let (key, dir) = installed_dir(&game_key)?;
+        Ok(mods::detect::detect(&key, &dir, &mods::saha_files(&key, &dir)))
+    })
+    .await?
+}
+
+#[tauri::command]
+pub async fn mod_external_toggle(game_key: String, id: String, enabled: bool) -> Result<()> {
+    blocking(move || {
+        let (key, dir) = installed_dir(&game_key)?;
+        mods::detect::set_enabled(&key, &dir, &id, enabled, &mods::saha_files(&key, &dir))
+    })
+    .await?
+}
+
+/// Per game: (enabled, total) hand-installed + Saha mods, for badges in the library.
+#[tauri::command]
+pub async fn mods_counts() -> Result<HashMap<String, (usize, usize)>> {
+    blocking(|| {
+        let lib = library::scan();
+        let saha = mods::list();
+        lib.games
+            .iter()
+            .filter(|g| g.installed)
+            .filter_map(|g| {
+                let dir = g.install_dir.as_deref()?;
+                let ext = mods::detect::detect(&g.key, dir, &mods::saha_files(&g.key, dir));
+                let own: Vec<_> = saha.iter().filter(|m| m.game_key == g.key).collect();
+                let total = ext.len() + own.len();
+                let on = ext.iter().filter(|m| m.enabled).count() + own.iter().filter(|m| m.enabled).count();
+                (total > 0).then(|| (g.key.clone(), (on, total)))
+            })
+            .collect()
+    })
+    .await
+}

@@ -1,6 +1,6 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type { Art, Details, InstalledMod, Library, ModInfo, ModSupport, Settings, StorageReport, StoreItem } from "./types";
+import type { Art, Details, ExternalMod, InstalledMod, Library, ModInfo, ModSupport, Settings, StorageReport, StoreItem } from "./types";
 
 type Prog = { key: string; message: string };
 
@@ -27,6 +27,9 @@ export const api = {
   modRemove: (id: string) => invoke<void>("mod_remove", { id }),
   openExternal: (url: string) => invoke<void>("open_external", { url }),
   storageReport: () => invoke<StorageReport>("storage_report"),
+  modsExternal: (gameKey: string) => invoke<ExternalMod[]>("mods_external", { gameKey }),
+  modExternalToggle: (gameKey: string, id: string, enabled: boolean) => invoke<void>("mod_external_toggle", { gameKey, id, enabled }),
+  modsCounts: () => invoke<Record<string, [number, number]>>("mods_counts"),
   modExplain: (name: string, game: string, summary: string, description: string) =>
     invoke<{ arabic: string; video?: { id: string; title: string; url: string }; searchUrl: string }>("mod_explain", { name, game, summary, description }),
   openFolder: (path: string) => invoke<void>("open_folder", { path }),

@@ -106,7 +106,10 @@ export interface Profile {
   header: string;
 }
 
-export interface Deal { store: string; price: string; retail: string; savings: number; url: string }
+export interface Deal { store: string; trust: "official" | "authorized"; price: string; retail: string; savings: number; url: string }
+
+/** A mod the user installed by hand (detected automatically). */
+export interface ExternalMod { id: string; name: string; kind: "loader" | "mod" | "graphics"; paths: string[]; enabled: boolean }
 
 export interface Details {
   steamAppId?: number;

@@ -7,6 +7,7 @@
 //! Enabling copies staging -> game folder; disabling removes exactly those files and
 //! restores the backups, so the game is back to its original state.
 //! Online-only games are blocked to avoid bans.
+pub mod detect;
 pub mod explain;
 pub mod nexus;
 
@@ -364,4 +365,24 @@ fn copy_dir(from: &Path, to: &Path) -> std::io::Result<()> {
         }
     }
     Ok(())
+}
+
+/// Files Saha installed for a game, relative to the game folder (to hide them from detection).
+pub fn saha_files(game_key: &str, game_dir: &str) -> Vec<String> {
+    let base = PathBuf::from(game_dir);
+    list()
+        .into_iter()
+        .filter(|m| m.game_key == game_key)
+        .flat_map(|m| {
+            let target = PathBuf::from(&m.target);
+            let prefix = target.strip_prefix(&base).map(|p| p.to_string_lossy().replace('\\', "/")).unwrap_or_default();
+            m.files
+                .into_iter()
+                .map(move |f| {
+                    let f = f.replace('\\', "/");
+                    if prefix.is_empty() { f } else { format!("{prefix}/{f}") }
+                })
+                .collect::<Vec<_>>()
+        })
+        .collect()
 }

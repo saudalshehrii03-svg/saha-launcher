@@ -74,6 +74,9 @@ pub fn run() {
             commands::open_external,
             commands::storage_report,
             commands::mod_explain,
+            commands::mods_external,
+            commands::mod_external_toggle,
+            commands::mods_counts,
             commands::open_folder,
         ])
         .run(tauri::generate_context!())
