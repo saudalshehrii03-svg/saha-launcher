@@ -1,6 +1,6 @@
 [package]
 name = "saha-launcher"
-version = "0.2.0"
+version = "0.2.1"
 description = "Saha: one launcher for every game library, account and mod"
 edition = "2021"
 
@@ -28,4 +28,4 @@ tauri-plugin-single-instance = { version = "2", features = ["deep-link"] }
 
 [target.'cfg(windows)'.dependencies]
 winreg = "0.55"
-windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading", "Win32_System_Diagnostics_ToolHelp"] }
+windows-sys = { version = "0.59", features = ["Win32_Foundation", "Win32_UI_WindowsAndMessaging", "Win32_System_Threading", "Win32_System_Diagnostics_ToolHelp", "Win32_Storage_FileSystem"] }

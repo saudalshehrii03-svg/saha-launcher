@@ -12,11 +12,19 @@ use crate::error::Result;
 pub struct Theme {
     pub accent: String,
     pub accent2: String,
+    /// Window background.
+    pub bg: String,
+    /// Background glow strength, 0–200 (%).
+    pub glow: u32,
+    /// Glass opacity, 0–200 (%).
+    pub glass: u32,
+    /// Glass blur in px.
+    pub blur: u32,
 }
 
 impl Default for Theme {
     fn default() -> Self {
-        Theme { accent: "#ff2a4d".into(), accent2: "#8a0f24".into() }
+        Theme { accent: "#ff2a4d".into(), accent2: "#8a0f24".into(), bg: "#030304".into(), glow: 60, glass: 100, blur: 28 }
     }
 }
 

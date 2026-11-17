@@ -1,6 +1,7 @@
 //! Official covers for games that are not Steam games (Steam games use their own art).
 //! 1. Steam store search by title (no key needed): if the game is also on Steam, use its art.
 //! 2. SteamGridDB, when the user added an API key in settings.
+//!
 //! Results (including misses) are cached in art.json so lookups happen once.
 use std::collections::HashMap;
 use std::time::Duration;

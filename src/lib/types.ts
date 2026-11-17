@@ -60,6 +60,21 @@ export interface Library {
 export interface Theme {
   accent: string;
   accent2: string;
+  /** Window background. */
+  bg: string;
+  /** Glow strength 0–200 (%). */
+  glow: number;
+  /** Glass opacity 0–200 (%). */
+  glass: number;
+  /** Glass blur px. */
+  blur: number;
+}
+
+export interface StorageReport {
+  drives: { root: string; total: number; free: number; games: number }[];
+  games: { key: string; title: string; platform: PlatformId; bytes: number; dir: string }[];
+  modsBytes: number;
+  mediaBytes: number;
 }
 
 export interface Settings {

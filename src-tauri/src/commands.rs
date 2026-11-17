@@ -177,6 +177,21 @@ pub async fn mod_remove(id: String) -> Result<()> {
     blocking(move || mods::remove(&id)).await?
 }
 
+#[tauri::command]
+pub async fn storage_report() -> Result<crate::storage::Report> {
+    blocking(crate::storage::report).await
+}
+
+/// Show a game folder in Explorer (existing folders only).
+#[tauri::command]
+pub fn open_folder(path: String) -> Result<()> {
+    if !std::path::Path::new(&path).is_dir() {
+        return msg("المجلد غير موجود.");
+    }
+    std::process::Command::new("explorer.exe").arg(&path).spawn()?;
+    Ok(())
+}
+
 /// Open a web page in the default browser (store deals, Nexus pages).
 #[tauri::command]
 pub fn open_external(url: String) -> Result<()> {

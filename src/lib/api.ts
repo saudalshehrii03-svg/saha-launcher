@@ -1,6 +1,6 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import type { Art, Details, InstalledMod, Library, ModInfo, ModSupport, Settings, StoreItem } from "./types";
+import type { Art, Details, InstalledMod, Library, ModInfo, ModSupport, Settings, StorageReport, StoreItem } from "./types";
 
 type Prog = { key: string; message: string };
 
@@ -26,6 +26,8 @@ export const api = {
   modSetEnabled: (id: string, enabled: boolean) => invoke<InstalledMod>("mod_set_enabled", { id, enabled }),
   modRemove: (id: string) => invoke<void>("mod_remove", { id }),
   openExternal: (url: string) => invoke<void>("open_external", { url }),
+  storageReport: () => invoke<StorageReport>("storage_report"),
+  openFolder: (path: string) => invoke<void>("open_folder", { path }),
   onLaunchProgress: (cb: (p: Prog) => void) => listen<Prog>("launch-progress", (e) => cb(e.payload)),
   onModProgress: (cb: (p: Prog) => void) => listen<Prog>("mod-progress", (e) => cb(e.payload)),
   onGameState: (cb: (p: { key: string; running: boolean }) => void) =>

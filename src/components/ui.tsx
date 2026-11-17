@@ -77,7 +77,7 @@ export function Art({ game, kind, art, custom, className, children, onClick }: {
     <div
       className={className}
       onClick={onClick}
-      style={{ background: `linear-gradient(160deg, hsl(${hue} 60% 18%), hsl(${hue + 10} 50% 5%) 70%, #000)` }}
+      style={{ background: `linear-gradient(160deg, hsl(${hue} 10% 15%), hsl(${hue} 8% 6%) 70%, #000)` }}
     >
       {mine.length > 0 ? (
         mine.map((m, n) => <img key={m} src={m} alt="" className={`slide ${n === slide % mine.length ? "on" : ""}`} draggable={false} />)

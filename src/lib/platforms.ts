@@ -1,4 +1,4 @@
-import type { Art, Game, PlatformId } from "./types";
+import type { Art, Game, PlatformId, Theme } from "./types";
 
 export const PLATFORMS: Record<PlatformId, { name: string; short: string; bg: string; fg: string }> = {
   steam: { name: "Steam", short: "S", bg: "#1b2838", fg: "#66c0f4" },
@@ -26,7 +26,7 @@ export function artUrls(g: Game, kind: "cover" | "hero", art?: Art): string[] {
 }
 
 /** Color presets for Settings > Appearance. */
-export const THEMES: { name: string; accent: string; accent2: string }[] = [
+export const THEMES: { name: string; accent: string; accent2: string; bg?: string }[] = [
   { name: "أحمر ملكي", accent: "#ff2a4d", accent2: "#8a0f24" },
   { name: "قرمزي", accent: "#ff4d6d", accent2: "#3a0612" },
   { name: "تركواز", accent: "#00e0bd", accent2: "#7c5cff" },
@@ -34,11 +34,17 @@ export const THEMES: { name: string; accent: string; accent2: string }[] = [
   { name: "ذهبي", accent: "#ffc04d", accent2: "#ff6a3d" },
   { name: "أزرق", accent: "#4da3ff", accent2: "#00e0bd" },
   { name: "أخضر", accent: "#5ef08a", accent2: "#00b4d8" },
+  { name: "منتصف الليل", accent: "#7aa2ff", accent2: "#1b2a6b", bg: "#02030a" },
+  { name: "غروب", accent: "#ff7a3d", accent2: "#7a1a4a", bg: "#0a0305" },
 ];
 
 /** Apply a theme to CSS variables (text on accent buttons picks black/white by contrast). */
-export function applyTheme(t: { accent: string; accent2: string }) {
-  const s = document.documentElement.style;
+export function applyTheme(t: Partial<Theme> & { accent: string; accent2: string }, el: HTMLElement = document.documentElement) {
+  const s = el.style;
+  if (t.bg) s.setProperty("--bg", t.bg);
+  s.setProperty("--glow", String((t.glow ?? 100) / 100));
+  s.setProperty("--glass-k", String((t.glass ?? 100) / 100));
+  s.setProperty("--blur", `${t.blur ?? 28}px`);
   s.setProperty("--accent", t.accent);
   s.setProperty("--accent-2", t.accent2);
   const hex = t.accent.replace("#", "");

@@ -231,11 +231,10 @@ impl Platform for Steam {
             loop {
                 match s.load(Ordering::Relaxed) {
                     FAILED => return h,
-                    STARTED => {
-                        if started_at.get_or_insert_with(Instant::now).elapsed() > Duration::from_secs(25) {
+                    STARTED
+                        if started_at.get_or_insert_with(Instant::now).elapsed() > Duration::from_secs(25) => {
                             return h;
                         }
-                    }
                     _ => {}
                 }
                 h.sweep(&["steam.exe", "steamwebhelper.exe"]);

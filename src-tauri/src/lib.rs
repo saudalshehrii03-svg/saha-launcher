@@ -20,6 +20,7 @@ mod mods;
 mod online;
 mod platforms;
 mod settings;
+mod storage;
 mod sys;
 mod tracker;
 mod vdf;
@@ -71,6 +72,8 @@ pub fn run() {
             commands::mod_set_enabled,
             commands::mod_remove,
             commands::open_external,
+            commands::storage_report,
+            commands::open_folder,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Saha");

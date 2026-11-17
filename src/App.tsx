@@ -18,7 +18,7 @@ import { api, nexusGames } from "./lib/api";
 export type View =
   | { page: Exclude<PageId, "game"> }
   | { page: "game"; key?: string; appId?: number; title: string; tab?: "info" | "mods" | "installed" };
-export type Nav = { go: (v: View) => void; back: () => void };
+export type Nav = { go: (v: View) => void; back: () => void; forward: () => void };
 
 /** Liquid-glass light that follows the pointer over any glass surface. */
 function useGlassLight() {
@@ -36,15 +36,47 @@ function useGlassLight() {
 }
 
 export default function App() {
-  const [history, setHistory] = useState<View[]>([{ page: "library" }]);
-  const view = history[history.length - 1];
+  // Browser-like history: back/forward with the mouse side buttons or Alt+←/→.
+  const [hist, setHist] = useState<{ stack: View[]; at: number }>({ stack: [{ page: "library" }], at: 0 });
+  const view = hist.stack[hist.at];
   const nav: Nav = {
-    go: (v) => setHistory((h) => [...h.slice(-20), v]),
-    back: () => setHistory((h) => (h.length > 1 ? h.slice(0, -1) : h)),
+    go: (v) =>
+      setHist((h) => {
+        if (JSON.stringify(h.stack[h.at]) === JSON.stringify(v)) return h;
+        const stack = [...h.stack.slice(0, h.at + 1), v].slice(-30);
+        return { stack, at: stack.length - 1 };
+      }),
+    back: () => setHist((h) => ({ ...h, at: Math.max(0, h.at - 1) })),
+    forward: () => setHist((h) => ({ ...h, at: Math.min(h.stack.length - 1, h.at + 1) })),
   };
+  useEffect(() => {
+    // Mouse button 3 = back (thumb, near you), 4 = forward.
+    const block = (e: MouseEvent) => {
+      if (e.button === 3 || e.button === 4) e.preventDefault();
+    };
+    const up = (e: MouseEvent) => {
+      if (e.button === 3) setHist((h) => ({ ...h, at: Math.max(0, h.at - 1) }));
+      if (e.button === 4) setHist((h) => ({ ...h, at: Math.min(h.stack.length - 1, h.at + 1) }));
+      block(e);
+    };
+    const key = (e: KeyboardEvent) => {
+      if (!e.altKey) return;
+      // RTL: Alt+→ goes back, Alt+← forward (matches the reading direction)
+      if (e.key === "ArrowRight") setHist((h) => ({ ...h, at: Math.max(0, h.at - 1) }));
+      if (e.key === "ArrowLeft") setHist((h) => ({ ...h, at: Math.min(h.stack.length - 1, h.at + 1) }));
+    };
+    window.addEventListener("mousedown", block);
+    window.addEventListener("mouseup", up);
+    window.addEventListener("keydown", key);
+    return () => {
+      window.removeEventListener("mousedown", block);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("keydown", key);
+    };
+  }, []);
   const store = useLibrary();
-  const { accent, accent2 } = store.settings.theme;
-  useEffect(() => applyTheme({ accent, accent2 }), [accent, accent2]);
+  const theme = store.settings.theme;
+  useEffect(() => applyTheme(theme), [theme]);
   useEffect(() => {
     document.documentElement.dataset.mode = store.settings.mode || "glass";
   }, [store.settings.mode]);

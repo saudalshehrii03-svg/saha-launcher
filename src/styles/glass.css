@@ -1,23 +1,25 @@
 /* ================= Liquid glass · black & red (v0.2) =================
    Loaded after app.css and overrides it. Accent colors come from Settings. */
 body {
-  background: radial-gradient(55% 60% at 85% -5%, color-mix(in srgb, var(--accent-2) 45%, transparent), transparent 70%),
-    radial-gradient(45% 55% at -5% 105%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%), var(--bg);
+  background: radial-gradient(55% 60% at 85% -5%, color-mix(in srgb, var(--accent-2) calc(28% * var(--glow)), transparent), transparent 65%),
+    radial-gradient(45% 55% at -5% 105%, color-mix(in srgb, var(--accent) calc(7% * var(--glow)), transparent), transparent 65%), var(--bg);
 }
 .ambient { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.ambient { opacity: min(1, var(--glow)); }
 .ambient::before, .ambient::after { content: ""; position: absolute; width: 46vw; height: 46vw; border-radius: 50%; filter: blur(90px); opacity: 0.32; animation: drift 26s ease-in-out infinite alternate; }
-.ambient::before { background: var(--accent); top: -18vw; right: -10vw; opacity: 0.18; }
-.ambient::after { background: var(--accent-2); bottom: -22vw; left: 10vw; animation-delay: -13s; }
+.ambient::before { background: var(--accent); top: -18vw; right: -10vw; opacity: 0.08; }
+.ambient::after { background: var(--accent-2); bottom: -22vw; left: 10vw; animation-delay: -13s; opacity: 0.16; }
 @keyframes drift { to { transform: translate(-8vw, 6vw) scale(1.15); } }
 .shell > :not(.ambient):not(.toast):not(.update) { position: relative; z-index: 1; }
 [data-mode="amoled"] body { background: #000; }
+[data-mode="amoled"] { --bg: #000; }
 [data-mode="amoled"] .ambient { display: none; }
 [data-mode="amoled"] { --border: rgba(255, 255, 255, 0.07); }
 
 .glass {
   background:
-    radial-gradient(240px circle at var(--mx, -400px) var(--my, -400px), color-mix(in srgb, var(--accent) 17%, transparent), transparent 70%),
-    linear-gradient(150deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.015) 42%, rgba(255, 255, 255, 0.04));
+    radial-gradient(240px circle at var(--mx, -400px) var(--my, -400px), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+    linear-gradient(150deg, rgba(255, 255, 255, calc(0.08 * var(--glass-k))), rgba(255, 255, 255, calc(0.015 * var(--glass-k))) 42%, rgba(255, 255, 255, calc(0.04 * var(--glass-k))));
   backdrop-filter: blur(var(--blur)) saturate(185%) brightness(1.04);
   border: 1px solid var(--border);
   box-shadow: inset 0 1px 0 var(--highlight), inset 0 -1px 0 rgba(0, 0, 0, 0.45), inset 1px 0 0 rgba(255, 255, 255, 0.03), 0 24px 60px -30px rgba(0, 0, 0, 0.95);
@@ -27,19 +29,19 @@ body {
   background: radial-gradient(240px circle at var(--mx, -400px) var(--my, -400px), color-mix(in srgb, var(--accent) 14%, transparent), transparent 70%), rgba(255, 255, 255, 0.025);
 }
 button.glass:hover, .chip.glass:hover, .mod-card:hover, .store-card:hover, .theme:hover, .lc:hover, .acc:hover, label.glass:hover {
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-  box-shadow: inset 0 1px 0 var(--highlight), 0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent), 0 18px 50px -20px color-mix(in srgb, var(--accent) 45%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 32%, transparent);
+  box-shadow: inset 0 1px 0 var(--highlight), 0 18px 50px -24px color-mix(in srgb, var(--accent) 30%, transparent);
 }
 button:active:not(:disabled) { transform: scale(0.97); }
 
 .nav-item { position: relative; overflow: hidden; }
-.nav-item:hover { background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 16%, transparent), rgba(255, 255, 255, 0.03)); }
-.nav-item.on { background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 22%, transparent), rgba(255, 255, 255, 0.04)); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset -3px 0 0 var(--accent); }
+.nav-item:hover { background: radial-gradient(160px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 9%, transparent), rgba(255, 255, 255, 0.035)); }
+.nav-item.on { background: rgba(255, 255, 255, 0.07); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset -3px 0 0 var(--accent); }
 .logo { text-align: start; }
 .logo-avatar { width: 46px; height: 46px; border-radius: 15px; object-fit: cover; box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 60%, transparent); }
 .pd.plus { background: rgba(255, 255, 255, 0.06); color: var(--muted); }
 
-.chip.on { background: color-mix(in srgb, var(--accent) 24%, rgba(255, 255, 255, 0.04)); color: #fff; border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 0 24px -6px color-mix(in srgb, var(--accent) 70%, transparent), inset 0 1px 0 rgba(255, 255, 255, 0.18); font-weight: 600; }
+.chip.on { background: rgba(255, 255, 255, 0.09); color: #fff; border: 1px solid rgba(255, 255, 255, 0.14); box-shadow: inset 0 -2px 0 var(--accent), inset 0 1px 0 rgba(255, 255, 255, 0.14); font-weight: 600; }
 .play { background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent-2) 80%, var(--accent))); color: var(--on-accent); box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 14px 40px -12px color-mix(in srgb, var(--accent) 80%, transparent); position: relative; overflow: hidden; }
 .play::after { content: ""; position: absolute; inset: 0; background: radial-gradient(120px circle at var(--mx, 50%) var(--my, 0), rgba(255, 255, 255, 0.28), transparent 70%); opacity: 0; transition: opacity 0.3s; pointer-events: none; }
 .play:hover::after { opacity: 1; }
@@ -56,7 +58,7 @@ button:active:not(:disabled) { transform: scale(0.97); }
 /* segmented control */
 .seg { display: inline-flex; padding: 4px; border-radius: 14px; gap: 2px; }
 .seg button { height: 32px; padding: 0 14px; border-radius: 10px; font-size: 13px; color: var(--muted); transition: background 0.3s var(--ease), color 0.3s; }
-.seg button.on { background: color-mix(in srgb, var(--accent) 26%, transparent); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15); }
+.seg button.on { background: rgba(255, 255, 255, 0.1); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15); }
 .notice { margin: 14px 0; background: rgba(255, 192, 77, 0.08); }
 .notice.danger { background: rgba(255, 42, 77, 0.1); border-color: rgba(255, 42, 77, 0.4); color: #ff9aab; }
 .loading { display: flex; align-items: center; gap: 12px; padding: 18px 22px; border-radius: 18px; color: var(--muted); }
@@ -90,7 +92,7 @@ button:active:not(:disabled) { transform: scale(0.97); }
 .tabs { display: inline-flex; padding: 5px; border-radius: 18px; gap: 4px; margin-bottom: 18px; }
 .tabs button { height: 42px; padding: 0 20px; border-radius: 14px; color: var(--muted); font-size: 15px; transition: background 0.35s var(--ease), color 0.3s; }
 .tabs button:hover { color: var(--text); }
-.tabs button.on { background: color-mix(in srgb, var(--accent) 24%, rgba(255, 255, 255, 0.04)); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 0 22px -8px var(--accent); }
+.tabs button.on { background: rgba(255, 255, 255, 0.09); color: #fff; box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -2px 0 var(--accent); }
 .tab-body { animation: card-in 0.45s var(--ease) both; }
 .info-grid { display: grid; grid-template-columns: 1.6fr 1fr; gap: 18px; }
 .col { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
@@ -146,10 +148,10 @@ pre.desc { max-height: 520px; overflow: auto; }
 .price.owned { color: var(--accent); }
 
 /* profile */
-.pf-header { position: relative; height: 260px; border-radius: 28px; background: linear-gradient(135deg, var(--accent-2), #050102 70%) center / cover; overflow: hidden; }
+.pf-header { position: relative; height: 260px; border-radius: 28px; background: radial-gradient(80% 120% at 85% 0%, color-mix(in srgb, var(--accent-2) 45%, transparent), transparent 60%), #08080a center / cover; overflow: hidden; }
 .pf-edit { position: absolute; bottom: 14px; left: 14px; height: 40px; padding: 0 14px; border-radius: 12px; display: flex; align-items: center; gap: 8px; font-size: 13px; }
 .pf-id { display: flex; align-items: flex-end; gap: 22px; margin: -64px 32px 22px; position: relative; }
-.pf-avatar { position: relative; width: 132px; height: 132px; border-radius: 34px; overflow: hidden; display: grid; place-items: center; font-size: 48px; font-weight: 800; flex: none; box-shadow: 0 0 0 4px var(--bg), 0 0 40px -6px var(--accent); }
+.pf-avatar { position: relative; width: 132px; height: 132px; border-radius: 34px; overflow: hidden; display: grid; place-items: center; font-size: 48px; font-weight: 800; flex: none; box-shadow: 0 0 0 4px var(--bg), 0 0 30px -10px var(--accent); }
 .pf-avatar img { width: 100%; height: 100%; object-fit: cover; }
 .pf-av-edit { position: absolute; inset: auto 8px 8px auto; width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: rgba(0, 0, 0, 0.6); cursor: pointer; opacity: 0; transition: opacity 0.25s; }
 .pf-avatar:hover .pf-av-edit { opacity: 1; }
@@ -169,10 +171,10 @@ pre.desc { max-height: 520px; overflow: auto; }
 .poster.mini { border-radius: 12px; }
 
 /* update banner + toast */
-.update { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 14px; padding: 12px 14px 12px 18px; border-radius: 20px; min-width: 420px; animation: rise 0.5s var(--ease); background-color: rgba(20, 4, 8, 0.7); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.update { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 14px; padding: 12px 14px 12px 18px; border-radius: 20px; min-width: 420px; animation: rise 0.5s var(--ease); background-color: rgba(8, 8, 10, 0.8); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
 .update > svg { color: var(--accent); }
 .update > div { flex: 1; }
 .update b { display: block; }
 .update small { color: var(--muted); font-size: 12.5px; }
-.toast { background-color: rgba(14, 4, 7, 0.82); }
+.toast { background-color: rgba(8, 8, 10, 0.85); }
 .toast.done { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }

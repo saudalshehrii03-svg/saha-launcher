@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Icon } from "../components/ui";
 import { api } from "../lib/api";
-import { THEMES } from "../lib/platforms";
-import type { Theme } from "../lib/types";
+import ThemeEditor from "../components/ThemeEditor";
+import StoragePanel from "../components/StoragePanel";
 import type { Store } from "../lib/useLibrary";
 import { checkForUpdate, installUpdate } from "../components/UpdateBanner";
 
@@ -35,8 +35,6 @@ export default function Settings({ store }: { store: Store }) {
 
   const steamAccounts = lib.accounts.filter((a) => a.platform === "steam");
   const steamGames = lib.games.filter((g) => g.platform === "steam");
-  const theme = settings.theme;
-  const setTheme = (t: Theme) => saveSettings({ ...settings, theme: t });
 
   const setPinned = (key: string, id: string) => {
     const pinned = { ...settings.pinnedAccounts };
@@ -55,29 +53,8 @@ export default function Settings({ store }: { store: Store }) {
       <h1 className="page-title">الإعدادات</h1>
 
       <h2 className="section-title"><Icon name="palette" /> الألوان</h2>
-      <p className="lead">اختر ثيم جاهز أو لونك الخاص. يتطبّق على الأزرار والتوهج والخلفية فوراً.</p>
-      <div className="themes">
-        {THEMES.map((t) => {
-          const on = t.accent === theme.accent && t.accent2 === theme.accent2;
-          return (
-            <button key={t.name} className={`theme glass ${on ? "on" : ""}`} onClick={() => setTheme({ accent: t.accent, accent2: t.accent2 })}>
-              <span className="swatch" style={{ background: `linear-gradient(135deg, ${t.accent2}, ${t.accent})` }} />
-              {t.name}
-            </button>
-          );
-        })}
-      </div>
-      <div className="custom-colors glass">
-        <label>
-          اللون الأساسي
-          <input type="color" value={theme.accent} onChange={(e) => setTheme({ ...theme, accent: e.target.value })} />
-        </label>
-        <label>
-          اللون الثانوي
-          <input type="color" value={theme.accent2} onChange={(e) => setTheme({ ...theme, accent2: e.target.value })} />
-        </label>
-        <button className="link" onClick={() => setTheme({ accent: THEMES[0].accent, accent2: THEMES[0].accent2 })}>رجّع الافتراضي</button>
-      </div>
+      <p className="lead">غيّر الألوان والتوهج والزجاج، وشوف المعاينة قبل التطبيق.</p>
+      <ThemeEditor store={store} />
 
       <h2 className="section-title">نمط الشاشة</h2>
       <div className="themes">
@@ -150,6 +127,9 @@ export default function Settings({ store }: { store: Store }) {
         })}
         {steamGames.length === 0 && <p className="lead">ما فيه ألعاب ستيم.</p>}
       </div>
+
+      <h2 className="section-title">التخزين</h2>
+      <StoragePanel />
 
       <h2 className="section-title">التحديثات</h2>
       <div className="custom-colors glass">

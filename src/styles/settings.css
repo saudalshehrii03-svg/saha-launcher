@@ -1,0 +1,64 @@
+/* Settings: theme editor with live preview + storage panel. */
+.theme-editor { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 1.05fr); gap: 18px; align-items: start; }
+.te-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px 18px; padding: 16px 18px; border-radius: 20px; }
+.te-grid label { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13.5px; color: var(--muted); }
+.te-grid input[type="color"] { width: 44px; height: 30px; border: 0; border-radius: 9px; background: none; cursor: pointer; }
+.te-grid .range { grid-column: span 3; flex-direction: column; align-items: stretch; gap: 6px; }
+.te-grid .range span { display: flex; justify-content: space-between; }
+.te-grid .range b { color: var(--text); font-family: var(--font-display); font-weight: 600; }
+input[type="range"] { -webkit-appearance: none; appearance: none; height: 6px; border-radius: 6px; background: rgba(255, 255, 255, 0.1); outline: none; }
+input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 25%, transparent), 0 0 14px var(--accent); cursor: pointer; }
+
+/* mini replica of the app; its CSS variables are set on .te-preview only */
+.te-preview { position: sticky; top: 0; height: 330px; border-radius: 22px; overflow: hidden; display: grid; grid-template-columns: 1fr 110px; gap: 8px; padding: 8px; isolation: isolate; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1); font-size: 10px; }
+.pv-bg { position: absolute; inset: 0; z-index: -1;
+  background: radial-gradient(60% 60% at 85% -5%, color-mix(in srgb, var(--accent-2) calc(28% * var(--glow)), transparent), transparent 65%),
+    radial-gradient(50% 55% at -5% 105%, color-mix(in srgb, var(--accent) calc(7% * var(--glow)), transparent), transparent 70%), var(--bg); }
+.te-preview .glass { backdrop-filter: blur(calc(var(--blur) / 3)) saturate(180%); }
+.pv-side { order: 2; border-radius: 14px; padding: 8px 6px; display: flex; flex-direction: column; gap: 3px; }
+.pv-logo { display: flex; align-items: center; gap: 5px; padding: 2px 4px 8px; font-size: 12px; }
+.pv-logo span { width: 16px; height: 16px; border-radius: 5px; background: linear-gradient(135deg, var(--accent-2), var(--accent)); }
+.pv-item { padding: 5px 6px; border-radius: 7px; color: var(--muted); }
+.pv-item.on { color: #fff; background: rgba(255, 255, 255, 0.07); box-shadow: inset -2px 0 0 var(--accent); }
+.pv-side small { color: var(--muted); opacity: 0.7; margin: 6px 4px 2px; font-size: 8.5px; }
+.pv-main { order: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+.pv-search { height: 24px; border-radius: 9px; display: flex; align-items: center; padding: 0 9px; color: var(--muted); width: 70%; }
+.pv-hero { height: 100px; border-radius: 14px; padding: 12px; display: flex; flex-direction: column; justify-content: flex-end; gap: 7px;
+  background-image: linear-gradient(270deg, rgba(0, 0, 0, 0.6), transparent), linear-gradient(135deg, #1c1c22, #050506); }
+.pv-hero b { font-size: 15px; font-family: var(--font-display); }
+.pv-play { align-self: flex-start; padding: 5px 10px; border-radius: 8px; background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent-2) 80%, var(--accent))); color: var(--on-accent); font-weight: 700; box-shadow: 0 6px 16px -6px var(--accent); }
+.pv-chips { display: flex; gap: 5px; }
+.pv-chip { padding: 4px 9px; border-radius: 7px; color: var(--muted); }
+.pv-chip.on { color: #fff; background: rgba(255, 255, 255, 0.09); box-shadow: inset 0 -2px 0 var(--accent); }
+.pv-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.pv-poster { aspect-ratio: 3 / 4; border-radius: 8px; background: linear-gradient(160deg, #1d1d24, #060607); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08); }
+.pv-poster.hover { transform: translateY(-3px); box-shadow: 0 0 0 1.5px var(--accent), 0 10px 20px -8px var(--accent); }
+
+/* storage */
+.storage { display: flex; flex-direction: column; gap: 14px; }
+.drives { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+.drive { border-radius: 20px; padding: 16px 18px; }
+.drive-h { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px; font-size: 13px; color: var(--muted); }
+.drive-h b { font-size: 20px; color: var(--text); }
+.dbar { position: relative; height: 12px; border-radius: 8px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.dbar i { position: absolute; top: 0; bottom: 0; right: 0; border-radius: 8px; }
+.dbar i.other, .legend i.other { background: rgba(255, 255, 255, 0.28); }
+.dbar i.games, .legend i.games { background: linear-gradient(90deg, var(--accent-2), var(--accent)); box-shadow: 0 0 12px var(--accent); }
+.legend { display: flex; gap: 16px; margin-top: 9px; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-inline-end: 5px; }
+.sz-row { display: grid; grid-template-columns: auto minmax(0, 1.2fr) 1fr auto auto; gap: 12px; align-items: center; padding: 7px 0; font-size: 13.5px; }
+.sz-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card h4 .spacer { flex: 1; }
+@media (max-width: 1250px) { .theme-editor { grid-template-columns: 1fr; } .te-preview { position: relative; } }
+
+/* profile: clickable stats + panels */
+button.stat { text-align: start; cursor: pointer; }
+.stat.on { border-color: color-mix(in srgb, var(--accent) 40%, transparent); box-shadow: inset 0 -2px 0 var(--accent), inset 0 1px 0 var(--highlight); }
+.pf-panel { margin-top: 14px; animation: card-in 0.4s var(--ease) both; }
+.bar-row.clickable { width: 100%; text-align: start; border-radius: 10px; padding: 7px 8px; transition: background 0.2s; }
+.bar-row.clickable:hover { background: rgba(255, 255, 255, 0.05); }
+.plats { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+.plat-row { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); transition: background 0.2s; }
+.plat-row:hover { background: rgba(255, 255, 255, 0.07); }
+.plat-row span:nth-child(2) { flex: 1; text-align: start; }
+.plat-row small { color: var(--muted); }

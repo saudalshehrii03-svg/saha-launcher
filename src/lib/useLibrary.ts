@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "./api";
-import type { Library, PlatformId, Settings } from "./types";
+import type { Library, PlatformId, Settings, Theme } from "./types";
+
+export const DEFAULT_THEME: Theme = { accent: "#ff2a4d", accent2: "#8a0f24", bg: "#030304", glow: 60, glass: 100, blur: 28 };
 
 export type LaunchState = { key: string; message: string; status: "running" | "done" | "error" } | null;
 export type Filter = PlatformId | "all" | "favorites" | "hidden";
@@ -12,7 +14,7 @@ export const DEFAULT_SETTINGS: Settings = {
   favorites: [],
   hidden: [],
   minimizeOnPlay: true,
-  theme: { accent: "#ff2a4d", accent2: "#8a0f24" },
+  theme: DEFAULT_THEME,
   steamgriddbKey: "",
   steamApiKey: "",
   nexusKey: "",
@@ -52,7 +54,7 @@ export function useLibrary() {
     api
       .getSettings()
       .then((s) => {
-        setSettings({ ...DEFAULT_SETTINGS, ...s });
+        setSettings({ ...DEFAULT_SETTINGS, ...s, theme: { ...DEFAULT_THEME, ...s.theme } });
         // Owned games refresh once per start (needs the Steam Web API key).
         if (s.steamApiKey) api.syncOwned().then(() => rescan()).catch(() => {});
       })
