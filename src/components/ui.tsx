@@ -5,6 +5,8 @@ import { mediaUrl, uploadImage } from "../lib/api";
 
 const PATHS: Record<string, string> = {
   play: "M7 4.5v15l13-7.5z",
+  pad: "M7.5 7h9c2.3 0 3.8 1.4 4.3 3.6l1 4.6c.5 2.2-.7 3.8-2.4 3.8-1.2 0-2-.7-2.7-1.8l-.9-1.4H8.2l-.9 1.4C6.6 18.3 5.8 19 4.6 19c-1.7 0-2.9-1.6-2.4-3.8l1-4.6C3.7 8.4 5.2 7 7.5 7zM7 10.5v3M5.5 12h3M15.5 11h.01M17.5 13h.01",
+  fullscreen: "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5",
   search: "M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-4-4",
   grid: "M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z",
   layers: "M12 3 3 8l9 5 9-5zM3 13l9 5 9-5",

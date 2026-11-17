@@ -201,3 +201,9 @@ pub fn open_external(url: String) -> Result<()> {
     crate::sys::open_url(&url)?;
     Ok(())
 }
+
+/// Arabic "what it does" + one explainer video for a mod page.
+#[tauri::command]
+pub async fn mod_explain(name: String, game: String, summary: String, description: String) -> Result<mods::explain::Explain> {
+    blocking(move || mods::explain::explain(&name, &game, &summary, &description)).await
+}

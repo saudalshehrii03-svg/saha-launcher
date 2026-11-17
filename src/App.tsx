@@ -1,5 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { onOpenUrl, getCurrent } from "@tauri-apps/plugin-deep-link";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+
+/** F11 toggles full screen, Esc leaves it. */
+export async function toggleFullscreen(force?: boolean) {
+  const w = getCurrentWindow();
+  await w.setFullscreen(force ?? !(await w.isFullscreen()));
+}
 import Sidebar, { type PageId } from "./components/Sidebar";
 import LaunchToast from "./components/LaunchToast";
 import UpdateBanner from "./components/UpdateBanner";
@@ -60,6 +67,12 @@ export default function App() {
       block(e);
     };
     const key = (e: KeyboardEvent) => {
+      if (e.key === "F11") {
+        e.preventDefault();
+        toggleFullscreen().catch(() => {});
+        return;
+      }
+      if (e.key === "Escape") toggleFullscreen(false).catch(() => {});
       if (!e.altKey) return;
       // RTL: Alt+→ goes back, Alt+← forward (matches the reading direction)
       if (e.key === "ArrowRight") setHist((h) => ({ ...h, at: Math.max(0, h.at - 1) }));

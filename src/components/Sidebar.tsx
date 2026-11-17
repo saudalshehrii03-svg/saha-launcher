@@ -29,7 +29,7 @@ export default function Sidebar({ page, onNavigate, store }: Props) {
   return (
     <aside className="sidebar glass">
       <button className="logo" onClick={() => onNavigate("profile")} title="البروفايل">
-        {p.avatar ? <img className="logo-avatar" src={mediaUrl(p.avatar)} alt="" /> : <span className="logo-mark"><Icon name="play" size={22} /></span>}
+        {p.avatar ? <img className="logo-avatar" src={mediaUrl(p.avatar)} alt="" /> : <span className="logo-mark"><Icon name="pad" size={26} /></span>}
         <div>
           <b>{p.name || "ساحة"}</b>
           <small>SAHA LAUNCHER</small>

@@ -27,6 +27,8 @@ export const api = {
   modRemove: (id: string) => invoke<void>("mod_remove", { id }),
   openExternal: (url: string) => invoke<void>("open_external", { url }),
   storageReport: () => invoke<StorageReport>("storage_report"),
+  modExplain: (name: string, game: string, summary: string, description: string) =>
+    invoke<{ arabic: string; video?: { id: string; title: string; url: string }; searchUrl: string }>("mod_explain", { name, game, summary, description }),
   openFolder: (path: string) => invoke<void>("open_folder", { path }),
   onLaunchProgress: (cb: (p: Prog) => void) => listen<Prog>("launch-progress", (e) => cb(e.payload)),
   onModProgress: (cb: (p: Prog) => void) => listen<Prog>("mod-progress", (e) => cb(e.payload)),

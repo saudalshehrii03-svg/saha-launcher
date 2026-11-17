@@ -95,7 +95,7 @@ export default function GamePage({ store, nav, view, game }: { store: Store; nav
       <div className="tab-body" key={tab + (openMod?.modId ?? "")}>
         {tab === "info" && <Info details={details} game={game} store={store} />}
         {tab === "mods" && !openMod && <ModBrowser support={support} onOpen={setOpenMod} />}
-        {tab === "mods" && openMod && <ModView mod={openMod} game={game} store={store} support={support} installed={installed} onDone={refreshInstalled} />}
+        {tab === "mods" && openMod && <ModView gameTitle={title} mod={openMod} game={game} store={store} support={support} installed={installed} onDone={refreshInstalled} />}
         {tab === "installed" && <Installed mods={installed} store={store} onChange={refreshInstalled} game={game} />}
       </div>
     </section>
@@ -232,11 +232,19 @@ function ModBrowser({ support, onOpen }: { support: ModSupport | null; onOpen: (
   );
 }
 
-function ModView({ mod, game, store, support, installed, onDone }: { mod: ModInfo; game?: Game; store: Store; support: ModSupport | null; installed: InstalledMod[]; onDone: () => void }) {
+function ModView({ gameTitle, mod, game, store, support, installed, onDone }: { gameTitle: string; mod: ModInfo; game?: Game; store: Store; support: ModSupport | null; installed: InstalledMod[]; onDone: () => void }) {
   const [full, setFull] = useState<ModInfo>(mod);
+  const [explain, setExplain] = useState<Awaited<ReturnType<typeof api.modExplain>> | null>(null);
   useEffect(() => {
-    api.modPage(mod.domain, mod.modId).then(setFull).catch(() => {});
-  }, [mod]);
+    api
+      .modPage(mod.domain, mod.modId)
+      .then((m) => {
+        setFull(m);
+        return api.modExplain(m.name, gameTitle, m.summary, m.description);
+      })
+      .then(setExplain)
+      .catch(() => {});
+  }, [mod, gameTitle]);
   const have = installed.find((m) => m.modId === mod.modId);
   const canInstall = game?.installed && !support?.blocked;
   const images = [full.picture, ...full.images].filter(Boolean) as string[];
@@ -289,6 +297,26 @@ function ModView({ mod, game, store, support, installed, onDone }: { mod: ModInf
             <button className="btn2 glass" onClick={() => api.openExternal(`${full.url}?tab=posts`)}><Icon name="people" size={16} /> آراء الناس والتعليقات</button>
             <button className="btn2 glass" onClick={() => api.openExternal(full.url)}><Icon name="external" size={16} /> صفحة المود في Nexus</button>
           </div>
+        </div>
+        <div className="card glass explain">
+          <h4><Icon name="sparkle" size={18} /> وش يسوي هذا المود؟</h4>
+          {!explain ? (
+            <p className="hint"><span className="spinner" /> جاري التلخيص بالعربي…</p>
+          ) : (
+            <>
+              <p className="ar-explain">{explain.arabic || full.summary}</p>
+              {explain.video ? (
+                <button className="video" onClick={() => api.openExternal(explain.video!.url)}>
+                  <img src={`https://i.ytimg.com/vi/${explain.video.id}/mqdefault.jpg`} alt="" />
+                  <span className="vplay"><Icon name="play" size={20} /></span>
+                  <span className="vtitle en">{explain.video.title}</span>
+                </button>
+              ) : (
+                <button className="btn2 glass" onClick={() => api.openExternal(explain.searchUrl)}><Icon name="play" size={16} /> مقاطع شرح على يوتيوب</button>
+              )}
+              <small className="hint">الشرح مترجم آلياً من وصف المود.</small>
+            </>
+          )}
         </div>
         {full.description && <pre className="desc glass">{full.description}</pre>}
       </div>

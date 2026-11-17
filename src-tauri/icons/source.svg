@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <!-- Saha app icon: black glass tile with a game controller and red accents. -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1c1c21"/>
+      <stop offset="1" stop-color="#050506"/>
+    </linearGradient>
+    <linearGradient id="pad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a2a31"/>
+      <stop offset="1" stop-color="#101013"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.62" r="0.5">
+      <stop offset="0" stop-color="#ff2a4d" stop-opacity="0.35"/>
+      <stop offset="1" stop-color="#ff2a4d" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect x="32" y="32" width="960" height="960" rx="220" fill="url(#tile)"/>
+  <rect x="33.5" y="33.5" width="957" height="957" rx="218.5" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="3"/>
+  <ellipse cx="512" cy="600" rx="380" ry="260" fill="url(#glow)"/>
+  <!-- controller body -->
+  <path d="M330 330h364c88 0 150 52 172 140l52 210c22 88-28 150-98 150-50 0-82-30-110-74l-34-54H348l-34 54c-28 44-60 74-110 74-70 0-120-62-98-150l52-210c22-88 84-140 172-140z"
+        fill="url(#pad)" stroke="#ffffff" stroke-opacity="0.18" stroke-width="6"/>
+  <!-- d-pad -->
+  <rect x="300" y="470" width="44" height="140" rx="12" fill="#e9e6e8"/>
+  <rect x="252" y="518" width="140" height="44" rx="12" fill="#e9e6e8"/>
+  <!-- buttons -->
+  <circle cx="704" cy="478" r="30" fill="#ff2a4d"/>
+  <circle cx="764" cy="540" r="30" fill="#e9e6e8"/>
+  <circle cx="644" cy="540" r="30" fill="#e9e6e8"/>
+  <circle cx="704" cy="602" r="30" fill="#e9e6e8"/>
+  <!-- center light -->
+  <rect x="470" y="420" width="84" height="22" rx="11" fill="#ff2a4d"/>
+</svg>

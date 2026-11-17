@@ -7,6 +7,7 @@
 //! Enabling copies staging -> game folder; disabling removes exactly those files and
 //! restores the backups, so the game is back to its original state.
 //! Online-only games are blocked to avoid bans.
+pub mod explain;
 pub mod nexus;
 
 use std::fs;

@@ -4,7 +4,7 @@ import { Art, Badge, Icon } from "../components/ui";
 import { PLATFORMS, ago, gb, hours, num } from "../lib/platforms";
 import type { Account, Game } from "../lib/types";
 import type { Filter, Store } from "../lib/useLibrary";
-import type { Nav } from "../App";
+import { toggleFullscreen, type Nav } from "../App";
 
 type Show = "installed" | "all";
 const readShow = (): Show => {
@@ -88,6 +88,9 @@ export default function Library({ store, nav }: { store: Store; nav: Nav }) {
           <span className="kbd">Ctrl K</span>
         </label>
         <span className="spacer" />
+        <button className="icon-btn glass" onClick={() => toggleFullscreen().catch(() => {})} title="ملء الشاشة (F11)">
+          <Icon name="fullscreen" />
+        </button>
         <button className="icon-btn glass" onClick={surprise} title="وش ألعب؟ اختيار عشوائي">
           <Icon name="dice" />
         </button>

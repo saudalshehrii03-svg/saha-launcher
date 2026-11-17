@@ -73,6 +73,7 @@ pub fn run() {
             commands::mod_remove,
             commands::open_external,
             commands::storage_report,
+            commands::mod_explain,
             commands::open_folder,
         ])
         .run(tauri::generate_context!())
