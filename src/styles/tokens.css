@@ -1,0 +1,18 @@
+/* Design tokens (glass, dark). Change identity here. */
+:root {
+  --bg: #07080d;
+  --text: #eef1f8;
+  --muted: rgba(238, 241, 248, 0.6);
+  --accent: #00e0bd;
+  --accent-2: #7c5cff;
+  --glass: rgba(255, 255, 255, 0.055);
+  --glass-strong: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.1);
+  --highlight: rgba(255, 255, 255, 0.12);
+  --blur: 30px;
+  --radius-card: 22px;
+  --radius-btn: 16px;
+  --font: "Rubik", "Noto Kufi Arabic", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Rubik", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
