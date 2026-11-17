@@ -2,10 +2,17 @@ use serde::Serialize;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("not implemented yet: {0}")]
-    NotImplemented(&'static str),
     #[error("io: {0}")]
     Io(#[from] std::io::Error),
+    #[error("json: {0}")]
+    Json(#[from] serde_json::Error),
+    /// User-facing message (Arabic), shown as-is in the UI.
+    #[error("{0}")]
+    Msg(String),
+}
+
+pub fn msg<T>(s: impl Into<String>) -> Result<T> {
+    Err(Error::Msg(s.into()))
 }
 
 // Errors cross the IPC boundary as plain strings.
