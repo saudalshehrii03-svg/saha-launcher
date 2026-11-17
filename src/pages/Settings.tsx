@@ -48,6 +48,10 @@ export default function Settings({ store }: { store: Store }) {
 
   const steamAccounts = lib.accounts.filter((a) => a.platform === "steam");
   const steamGames = lib.games.filter((g) => g.platform === "steam");
+  // Collapsed by default: protected (CoD) and already-pinned games first, then the rest.
+  const [showAllPins, setShowAllPins] = useState(false);
+  const pinRank = (g: (typeof steamGames)[number]) => (g.guarded ? 0 : settings.pinnedAccounts[g.key] ? 1 : 2);
+  const pinGames = [...steamGames].sort((a, b) => pinRank(a) - pinRank(b) || a.title.localeCompare(b.title));
 
   const setPinned = (key: string, id: string) => {
     const pinned = { ...settings.pinnedAccounts };
@@ -136,7 +140,7 @@ export default function Settings({ store }: { store: Store }) {
       <h2 className="section-title">حساب مفروض لكل لعبة</h2>
       <p className="lead">«تلقائي» يعني الحساب اللي يملك اللعبة. الحسابات المحظورة في Call of Duty ما تظهر لألعابها.</p>
       <div className="pins glass">
-        {steamGames.map((g) => {
+        {(showAllPins ? pinGames : pinGames.slice(0, 1)).map((g) => {
           const options = steamAccounts.filter((a) => !(g.guarded && settings.codBannedAccounts.includes(a.id)));
           return (
             <div key={g.key} className="pin-row">
@@ -151,6 +155,12 @@ export default function Settings({ store }: { store: Store }) {
           );
         })}
         {steamGames.length === 0 && <p className="lead">ما فيه ألعاب ستيم.</p>}
+        {pinGames.length > 1 && (
+          <button className="more-btn" onClick={() => setShowAllPins((v) => !v)}>
+            {showAllPins ? "عرض أقل" : `عرض المزيد (${pinGames.length - 1})`}
+            <Icon name="back" size={14} />
+          </button>
+        )}
       </div>
 
       <h2 className="section-title">التخزين</h2>

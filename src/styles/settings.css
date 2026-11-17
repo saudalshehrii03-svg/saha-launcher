@@ -90,3 +90,8 @@ button.stat { text-align: start; cursor: pointer; }
 
 .nexus-for { margin: -4px 0 12px; }
 .nexus-for b { color: var(--text); }
+
+/* collapsed lists: "show more" */
+.more-btn { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; padding: 12px 0 6px; color: var(--muted); font-size: 13.5px; transition: color 0.2s; }
+.more-btn:hover { color: var(--text); }
+.more-btn svg { transform: rotate(-90deg); }
