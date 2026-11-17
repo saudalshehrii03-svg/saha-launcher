@@ -7,7 +7,7 @@ use crate::error::{msg, Result};
 use crate::library::models::{Game, PlatformId};
 use crate::sys::{self, Hive};
 
-use super::{Platform, Progress};
+use super::{launch_in_background, Platform, Progress};
 
 const REG: &str = r"SOFTWARE\WOW6432Node\GOG.com";
 
@@ -49,11 +49,14 @@ impl Platform for Gog {
     fn launch(&self, game: &Game, progress: Progress) -> Result<()> {
         let dir = game.install_dir.clone().unwrap_or_default();
         if let Some(galaxy) = galaxy_exe() {
-            progress("تشغيل اللعبة عبر GOG Galaxy…");
+            progress("تشغيل اللعبة عبر GOG Galaxy في الخلفية…");
             let id = format!("/gameId={}", game.app_id);
             let path = format!("/path={dir}");
-            sys::spawn(&galaxy, &["/command=runGame", &id, &path])?;
-            return Ok(());
+            let start = || -> Result<()> {
+                sys::spawn(&galaxy, &["/command=runGame", &id, &path])?;
+                Ok(())
+            };
+            return launch_in_background(game, &["galaxyclient.exe", "galaxyclient helper.exe"], false, progress, &start);
         }
         let Some(exe) = game_reg(&game.app_id, "exe").map(PathBuf::from).filter(|p| p.is_file()) else {
             return msg("ما لقيت ملف تشغيل اللعبة.");

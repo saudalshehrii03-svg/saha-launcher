@@ -8,7 +8,7 @@ use crate::error::Result;
 use crate::library::models::{Game, PlatformId};
 use crate::sys::{self, Hive};
 
-use super::{Platform, Progress};
+use super::{launch_in_background, Platform, Progress};
 
 const REG: &str = r"SOFTWARE\WOW6432Node\Ubisoft\Launcher";
 
@@ -51,8 +51,12 @@ impl Platform for Ubisoft {
         Ok(games)
     }
     fn launch(&self, game: &Game, progress: Progress) -> Result<()> {
-        progress("تشغيل اللعبة عبر Ubisoft Connect…");
-        sys::open_url(&format!("uplay://launch/{}/0", game.app_id))?;
-        Ok(())
+        progress("تشغيل اللعبة عبر Ubisoft Connect في الخلفية…");
+        let url = format!("uplay://launch/{}/0", game.app_id);
+        let start = || -> Result<()> {
+            sys::open_url(&url)?;
+            Ok(())
+        };
+        launch_in_background(game, &["upc.exe", "ubisoftconnect.exe", "uplaywebcore.exe"], true, progress, &start)
     }
 }

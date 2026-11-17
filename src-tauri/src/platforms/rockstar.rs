@@ -8,7 +8,7 @@ use crate::error::{msg, Result};
 use crate::library::models::{Game, PlatformId};
 use crate::sys::{self, Hive};
 
-use super::{Platform, Progress};
+use super::{launch_in_background, Platform, Progress};
 
 const REG: &str = r"SOFTWARE\WOW6432Node\Rockstar Games";
 const NOT_GAMES: &[&str] = &["Launcher", "Rockstar Games Social Club", "Steam"];
@@ -85,8 +85,13 @@ impl Platform for Rockstar {
     fn launch(&self, game: &Game, progress: Progress) -> Result<()> {
         let Some(dir) = game.install_dir.as_deref() else { return msg("مسار اللعبة غير معروف.") };
         let Some(launcher) = launcher_dir() else { return msg("Rockstar Games Launcher غير مثبت.") };
-        progress("تشغيل اللعبة عبر Rockstar…");
-        sys::spawn(&launcher.join("Launcher.exe"), &["-launchTitleInFolder", dir])?;
-        Ok(())
+        progress("تشغيل اللعبة عبر Rockstar في الخلفية…");
+        let exe = launcher.join("Launcher.exe");
+        let start = || -> Result<()> {
+            sys::spawn(&exe, &["-launchTitleInFolder", dir])?;
+            Ok(())
+        };
+        const IMAGES: &[&str] = &["rockstar games\\launcher\\launcher.exe", "launcherpatcher.exe", "socialclubhelper.exe", "rockstarservice.exe"];
+        launch_in_background(game, IMAGES, false, progress, &start)
     }
 }

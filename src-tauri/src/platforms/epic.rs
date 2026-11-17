@@ -9,7 +9,14 @@ use crate::error::Result;
 use crate::library::models::{Game, PlatformId};
 use crate::sys;
 
-use super::{Platform, Progress};
+use super::{launch_in_background, Platform, Progress};
+
+/// EpicGamesLauncher.exe from the registered URL handler (what Windows runs for epic links).
+fn launcher_exe() -> Option<PathBuf> {
+    let cmd = sys::reg_str(sys::Hive::LocalMachine, r"SOFTWARE\Classes\com.epicgames.launcher\shell\open\command", "")?;
+    let exe = cmd.trim().strip_prefix('"')?.split('"').next()?.to_string();
+    Some(PathBuf::from(exe)).filter(|p| p.is_file())
+}
 
 pub struct Epic;
 
@@ -80,9 +87,17 @@ impl Platform for Epic {
         Ok(games)
     }
     fn launch(&self, game: &Game, progress: Progress) -> Result<()> {
-        progress("تشغيل اللعبة عبر Epic…");
+        progress("تشغيل اللعبة عبر Epic في الخلفية…");
         let id = game.app_id.replace(':', "%3A");
-        sys::open_url(&format!("com.epicgames.launcher://apps/{id}?action=launch&silent=true"))?;
-        Ok(())
+        let url = format!("com.epicgames.launcher://apps/{id}?action=launch&silent=true");
+        let exe = launcher_exe();
+        let start = || -> Result<()> {
+            match &exe {
+                Some(e) => sys::spawn(e, &[&url])?,
+                None => sys::open_url(&url)?,
+            }
+            Ok(())
+        };
+        launch_in_background(game, &["epicgameslauncher.exe", "epicwebhelper.exe"], true, progress, &start)
     }
 }

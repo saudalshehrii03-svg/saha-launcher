@@ -8,7 +8,7 @@ use crate::error::{msg, Result};
 use crate::library::models::{Game, PlatformId};
 use crate::sys;
 
-use super::{Platform, Progress};
+use super::{launch_in_background, Platform, Progress};
 
 pub struct BattleNet;
 
@@ -52,9 +52,13 @@ impl Platform for BattleNet {
     }
     fn launch(&self, game: &Game, progress: Progress) -> Result<()> {
         let Some(dir) = client_dir() else { return msg("Battle.net غير مثبت.") };
-        progress("تشغيل اللعبة عبر Battle.net…");
+        progress("تشغيل اللعبة عبر Battle.net في الخلفية…");
+        let exe = dir.join("Battle.net.exe");
         let exec = format!("--exec=launch_uid {}", game.app_id);
-        sys::spawn(&dir.join("Battle.net.exe"), &[&exec])?;
-        Ok(())
+        let start = || -> Result<()> {
+            sys::spawn(&exe, &[&exec])?;
+            Ok(())
+        };
+        launch_in_background(game, &["battle.net.exe"], true, progress, &start)
     }
 }

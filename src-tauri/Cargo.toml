@@ -1,6 +1,6 @@
 [package]
 name = "saha-launcher"
-version = "0.2.1"
+version = "0.2.2"
 description = "Saha: one launcher for every game library, account and mod"
 edition = "2021"
 

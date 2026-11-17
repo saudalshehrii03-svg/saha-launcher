@@ -40,7 +40,7 @@ fn record(key: &str, minutes: u64) {
     let _ = settings::write_json(FILE, &all);
 }
 
-fn is_running(game: &Game) -> bool {
+pub fn is_running(game: &Game) -> bool {
     if game.platform == PlatformId::Steam {
         let want: u32 = game.app_id.parse().unwrap_or(0);
         return sys::reg_u32(Hive::CurrentUser, steam::REG, "RunningAppID") == Some(want);

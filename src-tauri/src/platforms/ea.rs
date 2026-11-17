@@ -8,7 +8,7 @@ use crate::error::{msg, Result};
 use crate::library::models::{Game, PlatformId};
 use crate::sys::{self, Hive};
 
-use super::{Platform, Progress};
+use super::{launch_in_background, Platform, Progress};
 
 pub struct Ea;
 
@@ -49,8 +49,12 @@ impl Platform for Ea {
         if self.install_path().is_none() {
             return msg("EA app غير مثبت.");
         }
-        progress("تشغيل اللعبة عبر EA app…");
-        sys::open_url(&format!("origin2://game/launch?offerIds={}&autoDownload=1", game.app_id))?;
-        Ok(())
+        progress("تشغيل اللعبة عبر EA app في الخلفية…");
+        let url = format!("origin2://game/launch?offerIds={}&autoDownload=1", game.app_id);
+        let start = || -> Result<()> {
+            sys::open_url(&url)?;
+            Ok(())
+        };
+        launch_in_background(game, &["eadesktop.exe", "eabackgroundservice.exe"], true, progress, &start)
     }
 }
