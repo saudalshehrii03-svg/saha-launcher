@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
   theme: DEFAULT_THEME,
   steamgriddbKey: "",
   steamApiKey: "",
+  anthropicKey: "",
   nexusKey: "",
   mode: "glass",
   profile: { name: "", bio: "", avatar: "", header: "" },

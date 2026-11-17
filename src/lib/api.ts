@@ -27,11 +27,15 @@ export const api = {
   modRemove: (id: string) => invoke<void>("mod_remove", { id }),
   openExternal: (url: string) => invoke<void>("open_external", { url }),
   storageReport: () => invoke<StorageReport>("storage_report"),
+  gameText: (title: string, description: string) => invoke<{ arabic: string; ai: boolean }>("game_text", { title, description }),
+  aiTestKey: (key: string) => invoke<void>("ai_test_key", { key }),
+  /** Nexus page in a window inside Saha; "Mod Manager Download" there installs directly. */
+  openNexus: (url: string) => invoke<void>("open_nexus", { url }),
   modsExternal: (gameKey: string) => invoke<ExternalMod[]>("mods_external", { gameKey }),
   modExternalToggle: (gameKey: string, id: string, enabled: boolean) => invoke<void>("mod_external_toggle", { gameKey, id, enabled }),
   modsCounts: () => invoke<Record<string, [number, number]>>("mods_counts"),
   modExplain: (name: string, game: string, summary: string, description: string) =>
-    invoke<{ arabic: string; video?: { id: string; title: string; url: string }; searchUrl: string }>("mod_explain", { name, game, summary, description }),
+    invoke<{ arabic: string; ai: boolean; video?: { id: string; title: string; url: string }; searchUrl: string }>("mod_explain", { name, game, summary, description }),
   openFolder: (path: string) => invoke<void>("open_folder", { path }),
   onLaunchProgress: (cb: (p: Prog) => void) => listen<Prog>("launch-progress", (e) => cb(e.payload)),
   onModProgress: (cb: (p: Prog) => void) => listen<Prog>("mod-progress", (e) => cb(e.payload)),

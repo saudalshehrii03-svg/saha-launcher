@@ -118,6 +118,7 @@ function Info({ details, game, store }: { details: Details | null; game?: Game; 
   return (
     <div className="info-grid">
       <div className="col">
+        <ArabicAbout details={details} />
         {details.description && <p className="desc glass">{details.description}</p>}
         {details.screenshots.length > 0 && (
           <div className="shots">
@@ -179,6 +180,22 @@ function Info({ details, game, store }: { details: Details | null; game?: Game; 
   );
 }
 
+/** "About the game" in Saudi Arabic (Claude when a key is set, else machine translation). */
+function ArabicAbout({ details }: { details: Details }) {
+  const [t, setT] = useState<{ arabic: string; ai: boolean } | null>(null);
+  useEffect(() => {
+    if (details.description) api.gameText(details.name, details.description).then(setT).catch(() => {});
+  }, [details.name, details.description]);
+  if (!details.description) return null;
+  return (
+    <div className="card glass explain">
+      <h4><Icon name="sparkle" size={18} /> عن اللعبة</h4>
+      {!t ? <p className="hint"><span className="spinner" /> جاري الكتابة بالعربي…</p> : <p className="ar-explain">{t.arabic || details.description}</p>}
+      {t && <small className="hint">{t.ai ? "✨ شرح ساحة الذكي (Claude)." : "مترجم آلياً. لشرح سعودي واضح أضف مفتاح Claude من الإعدادات."}</small>}
+    </div>
+  );
+}
+
 function ModBrowser({ support, onOpen }: { support: ModSupport | null; onOpen: (m: ModInfo) => void }) {
   const [term, setTerm] = useState("");
   const [sort, setSort] = useState("endorsements");
@@ -201,6 +218,7 @@ function ModBrowser({ support, onOpen }: { support: ModSupport | null; onOpen: (
 
   return (
     <>
+      <p className="hint nexus-for">مودات <b className="en">{support.nexusName}</b> من Nexus Mods</p>
       {support.warning && <div className="notice">⚠ {support.warning}</div>}
       <div className="mod-bar">
         <label className="search glass">
@@ -268,8 +286,8 @@ function ModView({ gameTitle, mod, game, store, support, installed, onDone }: { 
       })
       .catch((e) => {
         if (!String(e).includes("Mod Manager Download")) return store.notify(game.key, String(e), "error");
-        store.notify(game.key, "حسابك المجاني في Nexus يحتاج ضغطة «Mod Manager Download». فتحت لك صفحة الملفات، اضغطها وساحة تكمل التثبيت تلقائياً.", "running");
-        api.openExternal(`${mod.url}?tab=files`);
+        store.notify(game.key, "فتحت لك صفحة ملفات المود داخل ساحة: سجّل دخولك في Nexus مرة وحدة، واضغط «Mod Manager Download»، وساحة تثبّته على طول.", "running");
+        api.openNexus(`${mod.url}?tab=files`);
       });
   };
 
@@ -297,8 +315,8 @@ function ModView({ gameTitle, mod, game, store, support, installed, onDone }: { 
             ) : (
               <span className="hint">{support?.blocked ?? (game ? "ثبّت اللعبة أول عشان تركّب مودات." : "تقدر تتصفح المودات، والتثبيت للألعاب اللي عندك.")}</span>
             )}
-            <button className="btn2 glass" onClick={() => api.openExternal(`${full.url}?tab=posts`)}><Icon name="people" size={16} /> آراء الناس والتعليقات</button>
-            <button className="btn2 glass" onClick={() => api.openExternal(full.url)}><Icon name="external" size={16} /> صفحة المود في Nexus</button>
+            <button className="btn2 glass" onClick={() => api.openNexus(`${full.url}?tab=posts`)}><Icon name="people" size={16} /> آراء الناس والتعليقات</button>
+            <button className="btn2 glass" onClick={() => api.openNexus(full.url)}><Icon name="external" size={16} /> صفحة المود في Nexus</button>
           </div>
         </div>
         <div className="card glass explain">
@@ -317,7 +335,7 @@ function ModView({ gameTitle, mod, game, store, support, installed, onDone }: { 
               ) : (
                 <button className="btn2 glass" onClick={() => api.openExternal(explain.searchUrl)}><Icon name="play" size={16} /> مقاطع شرح على يوتيوب</button>
               )}
-              <small className="hint">الشرح مترجم آلياً من وصف المود.</small>
+              <small className="hint">{explain.ai ? "✨ شرح ساحة الذكي (Claude) من وصف المود." : "مترجم آلياً. لشرح سعودي واضح أضف مفتاح Claude من الإعدادات."}</small>
             </>
           )}
         </div>

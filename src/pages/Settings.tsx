@@ -12,6 +12,19 @@ export default function Settings({ store }: { store: Store }) {
   const [gridKey, setGridKey] = useState(settings.steamgriddbKey);
   const [steamKey, setSteamKey] = useState(settings.steamApiKey);
   const [nexusKey, setNexusKey] = useState(settings.nexusKey);
+  const [aiKey, setAiKey] = useState(settings.anthropicKey);
+  const [aiMsg, setAiMsg] = useState("");
+  useEffect(() => setAiKey(settings.anthropicKey), [settings.anthropicKey]);
+  const saveAiKey = async () => {
+    setAiMsg("جاري التحقق من المفتاح…");
+    try {
+      await api.aiTestKey(aiKey.trim());
+      await saveSettings({ ...settings, anthropicKey: aiKey.trim() });
+      setAiMsg("✓ تمام، الشرح العربي الذكي شغّال.");
+    } catch (e) {
+      setAiMsg(String(e));
+    }
+  };
   const [upd, setUpd] = useState("");
   useEffect(() => setSteamKey(settings.steamApiKey), [settings.steamApiKey]);
   useEffect(() => setNexusKey(settings.nexusKey), [settings.nexusKey]);
@@ -85,6 +98,18 @@ export default function Settings({ store }: { store: Store }) {
       <div className="custom-colors glass">
         <input className="text-input en" type="password" placeholder="Nexus Mods API key" value={nexusKey} onChange={(e) => setNexusKey(e.target.value)} />
         <button className="btn2 glass" onClick={() => saveSettings({ ...settings, nexusKey: nexusKey.trim() })} disabled={nexusKey.trim() === settings.nexusKey}>حفظ</button>
+      </div>
+
+      <h2 className="section-title"><Icon name="sparkle" /> الشرح العربي الذكي (Claude)</h2>
+      <p className="lead">
+        يكتب وصف كل مود وكل لعبة بالعربي السعودي الواضح، مو ترجمة حرفية. خذ مفتاح من
+        <button className="link inline" onClick={() => api.openExternal("https://console.anthropic.com/settings/keys")}> console.anthropic.com </button>
+        (يحتاج رصيد مدفوع مسبقاً). التكلفة تقريباً ٢ سنت لكل شرح، وكل مود أو لعبة يُشرح مرة وحدة ويُحفظ.
+      </p>
+      <div className="custom-colors glass">
+        <input className="text-input en" type="password" placeholder="Anthropic API key (sk-ant-...)" value={aiKey} onChange={(e) => setAiKey(e.target.value)} />
+        <button className="btn2 glass" onClick={saveAiKey} disabled={!aiKey.trim() || aiKey.trim() === settings.anthropicKey}>تحقق واحفظ</button>
+        {aiMsg && <span className="hint">{aiMsg}</span>}
       </div>
 
       <h2 className="section-title">أثناء اللعب</h2>

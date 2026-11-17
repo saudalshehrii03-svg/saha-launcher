@@ -87,3 +87,6 @@ button.stat { text-align: start; cursor: pointer; }
 .path-line { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; direction: ltr; text-align: right; font-size: 11.5px; }
 .trust { font-style: normal; font-size: 10.5px; padding: 1px 6px; border-radius: 6px; margin-inline-start: 6px; background: rgba(255, 255, 255, 0.07); color: var(--muted); }
 .trust.official { color: #3dff8a; background: rgba(61, 255, 138, 0.1); }
+
+.nexus-for { margin: -4px 0 12px; }
+.nexus-for b { color: var(--text); }

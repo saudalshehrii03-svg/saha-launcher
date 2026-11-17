@@ -90,6 +90,8 @@ export interface Settings {
   theme: Theme;
   steamgriddbKey: string;
   steamApiKey: string;
+  /** Anthropic key: Claude writes descriptions in Saudi Arabic. */
+  anthropicKey: string;
   nexusKey: string;
   /** "glass" | "amoled" */
   mode: string;
@@ -163,4 +165,4 @@ export interface InstalledMod {
   installedAt: number;
 }
 
-export interface ModSupport { domain?: string; blocked?: string; warning?: string }
+export interface ModSupport { domain?: string; nexusName?: string; blocked?: string; warning?: string }

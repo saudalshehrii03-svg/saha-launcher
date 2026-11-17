@@ -119,16 +119,22 @@ pub fn save_media(name: String, data: String) -> Result<String> {
 #[serde(rename_all = "camelCase")]
 pub struct ModSupport {
     domain: Option<String>,
+    /// Nexus game name the mods belong to (shown so a wrong match is obvious).
+    nexus_name: Option<String>,
     blocked: Option<&'static str>,
     warning: Option<&'static str>,
 }
 
 #[tauri::command]
 pub async fn mod_support(title: String) -> Result<ModSupport> {
-    blocking(move || ModSupport {
-        blocked: mods::blocked(&title),
-        warning: mods::warning(&title),
-        domain: nexus::game_domain(&title),
+    blocking(move || {
+        let found = nexus::game_domain(&title);
+        ModSupport {
+            blocked: mods::blocked(&title),
+            warning: mods::warning(&title),
+            nexus_name: found.as_ref().map(|f| f.1.clone()),
+            domain: found.map(|f| f.0),
+        }
     })
     .await
 }
@@ -254,4 +260,51 @@ pub async fn mods_counts() -> Result<HashMap<String, (usize, usize)>> {
             .collect()
     })
     .await
+}
+
+/// Arabic description of a game (Claude when a key is set, else machine translation).
+#[tauri::command]
+pub async fn game_text(title: String, description: String) -> Result<mods::explain::GameText> {
+    blocking(move || mods::explain::game_text(&title, &description)).await
+}
+
+#[tauri::command]
+pub async fn ai_test_key(key: String) -> Result<()> {
+    blocking(move || crate::ai::test_key(&key).map_err(Error::Msg)).await?
+}
+
+/// Open a Nexus Mods page in a window inside Saha. Free accounts must click
+/// "Mod Manager Download" on the site (Nexus rule); that nxm:// link is caught here
+/// and sent to the main window to install, so the user never leaves the app.
+/// The window loads a remote site, so it gets no IPC access (capabilities cover "main" only).
+#[tauri::command]
+pub fn open_nexus(app: AppHandle, url: String) -> Result<()> {
+    use tauri::Manager;
+    if !url.starts_with("https://www.nexusmods.com/") {
+        return msg("رابط غير مسموح.");
+    }
+    let parsed: tauri::Url = url.parse().map_err(|_| Error::Msg("رابط غير صالح.".into()))?;
+    if let Some(w) = app.get_webview_window("nexus") {
+        let _ = w.navigate(parsed);
+        let _ = w.unminimize();
+        let _ = w.set_focus();
+        return Ok(());
+    }
+    let handle = app.clone();
+    tauri::WebviewWindowBuilder::new(&app, "nexus", tauri::WebviewUrl::External(parsed))
+        .title("Nexus Mods · ساحة")
+        .inner_size(1180.0, 860.0)
+        .on_navigation(move |u| {
+            if u.scheme() == "nxm" {
+                let _ = handle.emit_to("main", "nxm-link", u.to_string());
+                if let Some(w) = handle.get_webview_window("nexus") {
+                    let _ = w.close();
+                }
+                return false;
+            }
+            matches!(u.scheme(), "https" | "about")
+        })
+        .build()
+        .map_err(|e| Error::Msg(e.to_string()))?;
+    Ok(())
 }

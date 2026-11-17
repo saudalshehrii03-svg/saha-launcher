@@ -12,6 +12,7 @@
 //! - `commands`  Tauri commands exposed to the frontend
 
 mod accounts;
+mod ai;
 mod art;
 mod commands;
 mod error;
@@ -77,6 +78,9 @@ pub fn run() {
             commands::mods_external,
             commands::mod_external_toggle,
             commands::mods_counts,
+            commands::game_text,
+            commands::ai_test_key,
+            commands::open_nexus,
             commands::open_folder,
         ])
         .run(tauri::generate_context!())

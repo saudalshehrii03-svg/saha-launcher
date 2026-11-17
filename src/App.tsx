@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { onOpenUrl, getCurrent } from "@tauri-apps/plugin-deep-link";
 import { getCurrentWindow } from "@tauri-apps/api/window";
+import { listen } from "@tauri-apps/api/event";
 
 /** F11 toggles full screen, Esc leaves it. */
 export async function toggleFullscreen(force?: boolean) {
@@ -119,8 +120,11 @@ export default function App() {
   useEffect(() => {
     getCurrent().then(handleLinks).catch(() => {});
     const un = onOpenUrl(handleLinks);
+    // nxm:// caught inside the in-app Nexus window
+    const un2 = listen<string>("nxm-link", (e) => handleLinks([e.payload]));
     return () => {
       un.then((f) => f()).catch(() => {});
+      un2.then((f) => f()).catch(() => {});
     };
   }, [handleLinks]);
 

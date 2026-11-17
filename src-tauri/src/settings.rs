@@ -57,6 +57,8 @@ pub struct Settings {
     pub steam_api_key: String,
     /// Nexus Mods personal API key (installing mods).
     pub nexus_key: String,
+    /// Anthropic API key: Claude writes mod/game descriptions in Saudi Arabic.
+    pub anthropic_key: String,
     /// "glass" (glows) or "amoled" (pure black).
     pub mode: String,
     pub profile: Profile,
@@ -76,6 +78,7 @@ impl Default for Settings {
             steamgriddb_key: String::new(),
             steam_api_key: String::new(),
             nexus_key: String::new(),
+            anthropic_key: String::new(),
             mode: "glass".into(),
             profile: Profile::default(),
             custom_covers: HashMap::new(),

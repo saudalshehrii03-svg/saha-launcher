@@ -19,6 +19,8 @@ pub struct Video {
 pub struct Explain {
     /// Arabic summary of what the mod does (empty if translation failed).
     pub arabic: String,
+    /// Written by Claude (true) or machine-translated (false).
+    pub ai: bool,
     pub video: Option<Video>,
     /// YouTube search page, used when no single video was found.
     pub search_url: String,
@@ -84,15 +86,36 @@ fn youtube(query: &str) -> Option<Video> {
     (id.len() == 11).then(|| Video { url: format!("https://www.youtube.com/watch?v={id}"), id, title })
 }
 
+/// Same Arabic text for a game page (story/description).
+#[derive(Debug, Clone, Serialize)]
+pub struct GameText {
+    pub arabic: String,
+    pub ai: bool,
+}
+
+pub fn game_text(title: &str, description: &str) -> GameText {
+    if let Some(t) = crate::ai::explain("game", title, title, description) {
+        return GameText { arabic: t, ai: true };
+    }
+    GameText { arabic: translate(description).unwrap_or_default(), ai: false }
+}
+
 pub fn explain(name: &str, game: &str, summary: &str, description: &str) -> Explain {
     let query = format!("{name} {game} mod");
     let search_url = format!("https://www.youtube.com/results?search_query={}", enc(&query));
     let src = source_text(summary, description);
     std::thread::scope(|s| {
-        let tr = s.spawn(|| translate(&src));
+        let tr = s.spawn(|| {
+            let full: String = format!("{summary}
+
+{description}").chars().take(6000).collect();
+            crate::ai::explain("mod", name, game, &full).map(|t| (t, true)).or_else(|| translate(&src).map(|t| (t, false)))
+        });
         let yt = s.spawn(|| youtube(&query));
+        let (arabic, ai) = tr.join().ok().flatten().unwrap_or_default();
         Explain {
-            arabic: tr.join().ok().flatten().unwrap_or_default(),
+            arabic,
+            ai,
             video: yt.join().ok().flatten(),
             search_url,
         }

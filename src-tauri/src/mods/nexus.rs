@@ -128,29 +128,41 @@ fn bbcode_to_text(s: &str) -> String {
     res.trim().chars().take(6000).collect()
 }
 
-/// Nexus domain for a game title ("Cyberpunk 2077®" -> "cyberpunk2077").
-pub fn game_domain(title: &str) -> Option<String> {
+/// Nexus game (domain, name) for a library title. Strict: the Nexus name must equal the
+/// title, its part before ":" / "-", or the title without edition words ("Demo", "Remastered"...).
+/// A loose "contains" match once linked games to the wrong mods, so prefixes alone never count.
+pub fn game_domain(title: &str) -> Option<(String, String)> {
     let clean: String = title.chars().filter(|c| !matches!(c, '®' | '™' | '©')).collect();
     let clean = clean.replace(" — ", " - ");
-    let q = "query($n: String!) { games(filter: { name: { value: $n, op: EQUALS } }) { nodes { domainName } } }";
-    let d = gql(q, json!({ "n": clean.trim() })).ok()?;
-    if let Some(dom) = d["games"]["nodes"][0]["domainName"].as_str() {
-        return Some(dom.to_string());
-    }
-    // Looser: "The Witcher 3: Wild Hunt - Remastered" -> search "The Witcher 3" (WILDCARD = contains),
-    // keep the longest Nexus name that is a prefix of the full title.
     let norm = |s: &str| s.chars().filter(|c| c.is_alphanumeric()).collect::<String>().to_lowercase();
-    let full = norm(&clean);
+    let mut accept = vec![norm(&clean)];
+    if let Some(short) = clean.split([':', '-', '—']).next() {
+        accept.push(norm(short));
+    }
+    let mut stripped = clean.to_lowercase();
+    for w in ["demo", "beta", "remastered", "enhanced", "definitive edition", "game of the year edition", "goty edition", "complete edition", "launcher", "director's cut"] {
+        stripped = stripped.replace(w, "");
+    }
+    accept.push(norm(&stripped));
+    accept.retain(|a| a.len() >= 3);
+
+    let q = "query($n: String!) { games(filter: { name: { value: $n, op: WILDCARD } }, count: 30) { nodes { domainName name } } }";
     let short = clean.split([':', '-', '—']).next()?.trim().to_string();
-    let q2 = "query($n: String!) { games(filter: { name: { value: $n, op: WILDCARD } }, count: 20) { nodes { domainName name } } }";
-    let d = gql(q2, json!({ "n": short })).ok()?;
-    d["games"]["nodes"]
-        .as_array()?
-        .iter()
-        .filter_map(|g| Some((norm(g["name"].as_str()?), g["domainName"].as_str()?.to_string())))
-        .filter(|(n, _)| !n.is_empty() && full.starts_with(n.as_str()))
-        .max_by_key(|(n, _)| n.len())
-        .map(|(_, d)| d)
+    let mut found: Vec<(String, String)> = Vec::new();
+    let stripped_term = stripped.split_whitespace().collect::<Vec<_>>().join(" ");
+    for term in [clean.trim().to_string(), short, stripped_term] {
+        if term.len() < 3 {
+            continue;
+        }
+        let Ok(d) = gql(q, json!({ "n": term })) else { continue };
+        for g in d["games"]["nodes"].as_array().into_iter().flatten() {
+            if let (Some(dom), Some(name)) = (g["domainName"].as_str(), g["name"].as_str()) {
+                found.push((dom.to_string(), name.to_string()));
+            }
+        }
+    }
+    // Prefer the most specific accepted form (full title first).
+    accept.iter().find_map(|a| found.iter().find(|(_, n)| norm(n) == *a).cloned())
 }
 
 /// Browse: sort = "endorsements" | "downloads" | "updatedAt" | "createdAt".
@@ -267,4 +279,16 @@ pub fn download_link(f: &FileRef) -> Result<(String, String, String)> {
         info["file_name"].as_str().unwrap_or("mod.zip").to_string(),
         info["version"].as_str().unwrap_or("").to_string(),
     ))
+}
+
+#[cfg(test)]
+mod tests {
+    /// Network: `cargo test domains_local -- --ignored --nocapture`
+    #[test]
+    #[ignore]
+    fn domains_local() {
+        for g in crate::library::scan().games {
+            println!("{} => {:?}", g.title, super::game_domain(&g.title));
+        }
+    }
 }
