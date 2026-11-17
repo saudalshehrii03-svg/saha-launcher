@@ -83,7 +83,7 @@ mod tests {
     #[ignore]
     fn art_lookup() {
         let lib = super::scan();
-        let games: Vec<_> = lib.games.into_iter().filter(|g| g.platform != super::PlatformId::Steam).collect();
+        let games = lib.games;
         for (k, a) in super::art::fetch_missing(&games) {
             println!("{k} -> {:?}", a.cover);
         }

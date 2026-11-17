@@ -34,6 +34,8 @@ export interface Game {
   playtimeMinutes?: number;
   /** Unix seconds. */
   lastPlayed?: number;
+  /** Microsoft Store id (Xbox games). */
+  storeId?: string;
 }
 
 export interface PlatformStatus {

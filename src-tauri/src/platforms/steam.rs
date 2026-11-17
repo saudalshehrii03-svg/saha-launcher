@@ -157,6 +157,7 @@ pub fn scan(inst: &Install, accounts: &[Account]) -> Vec<Game> {
                 size_bytes: m.str("SizeOnDisk").and_then(|s| s.parse().ok()),
                 playtime_minutes: (stat.0 > 0).then_some(stat.0),
                 last_played: (stat.1 > 0).then_some(stat.1),
+                store_id: None,
             };
             games.push(game);
         }
@@ -188,6 +189,7 @@ pub fn scan(inst: &Install, accounts: &[Account]) -> Vec<Game> {
                 size_bytes: None,
                 playtime_minutes: Some(o.playtime).filter(|p| *p > 0),
                 last_played: Some(o.last_played).filter(|p| *p > 0),
+                store_id: None,
             });
         }
     }

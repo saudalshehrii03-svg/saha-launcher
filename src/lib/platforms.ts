@@ -14,12 +14,14 @@ export const PLATFORMS: Record<PlatformId, { name: string; short: string; bg: st
 
 /** Candidate image URLs, tried in order. Empty = use the generated placeholder. */
 export function artUrls(g: Game, kind: "cover" | "hero", art?: Art): string[] {
+  const exact = kind === "cover" ? art?.cover : art?.hero;
   if (g.platform !== "steam") {
-    const url = kind === "cover" ? art?.cover : art?.hero ?? art?.cover;
+    const url = exact ?? (kind === "hero" ? art?.cover : undefined);
     return url ? [url] : [];
   }
   const file = kind === "cover" ? "library_600x900.jpg" : "library_hero.jpg";
   return [
+    ...(exact ? [exact] : []),
     `https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/${g.appId}/${file}`,
     `https://cdn.akamai.steamstatic.com/steam/apps/${g.appId}/${file}`,
   ];

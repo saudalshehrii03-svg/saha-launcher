@@ -178,3 +178,11 @@ pre.desc { max-height: 520px; overflow: auto; }
 .update small { color: var(--muted); font-size: 12.5px; }
 .toast { background-color: rgba(8, 8, 10, 0.85); }
 .toast.done { border-color: color-mix(in srgb, var(--accent) 50%, transparent); }
+
+/* thin black glass scrollbar (WebView2 / Chromium) */
+* { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, 0.14) transparent; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 6px; border: 1px solid rgba(255, 255, 255, 0.06); }
+::-webkit-scrollbar-thumb:hover { background: color-mix(in srgb, var(--accent) 55%, rgba(255, 255, 255, 0.2)); }
+::-webkit-scrollbar-corner { background: transparent; }

@@ -25,7 +25,7 @@ foreach ($p in Get-AppxPackage) {
   $app = @($m.Package.Applications.Application)[0].Id
   $name = $g.Game.ShellVisuals.DefaultDisplayName
   if (-not $name) { $name = $m.Package.Properties.DisplayName }
-  $out += [pscustomobject]@{ name = "$name"; pfn = $p.PackageFamilyName; app = "$app"; dir = $p.InstallLocation }
+  $out += [pscustomobject]@{ name = "$name"; pfn = $p.PackageFamilyName; app = "$app"; dir = $p.InstallLocation; store = "$($g.Game.StoreId)" }
 }
 ConvertTo-Json -InputObject @($out) -Compress
 "#;
@@ -36,6 +36,8 @@ struct Pkg {
     pfn: String,
     app: String,
     dir: String,
+    #[serde(default)]
+    store: String,
 }
 
 impl Platform for Xbox {
@@ -61,7 +63,9 @@ impl Platform for Xbox {
             .filter(|p| !p.app.is_empty())
             .map(|p| {
                 let app_id = format!("{}!{}", p.pfn, p.app);
-                Game::installed(PlatformId::Xbox, &p.pfn, &p.name, &app_id, Some(p.dir))
+                let mut g = Game::installed(PlatformId::Xbox, &p.pfn, &p.name, &app_id, Some(p.dir));
+                g.store_id = Some(p.store).filter(|s| !s.is_empty());
+                g
             })
             .collect())
     }

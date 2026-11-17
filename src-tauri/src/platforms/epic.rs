@@ -74,6 +74,7 @@ impl Platform for Epic {
                 size_bytes: it.install_size,
                 playtime_minutes: None,
                 last_played: None,
+                store_id: None,
             });
         }
         Ok(games)

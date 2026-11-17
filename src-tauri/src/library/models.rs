@@ -49,6 +49,9 @@ pub struct Game {
     pub playtime_minutes: Option<u64>,
     /// Unix seconds.
     pub last_played: Option<u64>,
+    /// Microsoft Store product id (Xbox games), used for official art.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub store_id: Option<String>,
 }
 
 impl PlatformId {
@@ -74,6 +77,7 @@ impl Game {
             size_bytes: None,
             playtime_minutes: None,
             last_played: None,
+            store_id: None,
         }
     }
 }

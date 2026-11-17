@@ -77,6 +77,7 @@ impl Platform for Rockstar {
                 size_bytes: None,
                 playtime_minutes: None,
                 last_played: None,
+                store_id: None,
             });
         }
         Ok(games)
