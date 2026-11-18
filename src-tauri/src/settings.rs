@@ -45,6 +45,9 @@ pub struct Settings {
     pub pinned_accounts: HashMap<String, String>,
     /// Steam accounts banned in Call of Duty. CoD never launches on these.
     pub cod_banned_accounts: Vec<String>,
+    /// Main Steam account: every game it owns launches on it (CoD rule still applies).
+    /// Empty = the account that owns the most games.
+    pub primary_account: String,
     pub favorites: Vec<String>,
     /// Games hidden from the library (tools, demos...).
     pub hidden: Vec<String>,
@@ -71,6 +74,7 @@ impl Default for Settings {
         Settings {
             pinned_accounts: HashMap::new(),
             cod_banned_accounts: Vec::new(),
+            primary_account: String::new(),
             favorites: Vec::new(),
             hidden: Vec::new(),
             minimize_on_play: true,

@@ -5,6 +5,9 @@ export default function Platforms({ store }: { store: Store }) {
   const { lib, settings, saveSettings } = store;
   const steamAccounts = lib.accounts.filter((a) => a.platform === "steam");
   const banned = settings.codBannedAccounts;
+  // Auto = account owning the most games (same rule as the backend).
+  const owns = (id: string) => lib.games.filter((g) => g.ownerAccountId === id).length;
+  const primaryId = settings.primaryAccount || [...steamAccounts].sort((x, y) => owns(y.id) - owns(x.id))[0]?.id;
 
   const toggleBanned = (id: string) => {
     const next = banned.includes(id) ? banned.filter((b) => b !== id) : [...banned, id];
@@ -39,21 +42,27 @@ export default function Platforms({ store }: { store: Store }) {
 
       <h2 className="section-title">حسابات ستيم</h2>
       <p className="lead">
-        كل لعبة تشتغل من الحساب اللي يملكها، وساحة تبدّل الحساب تلقائياً. لازم كل حساب يكون مسجّل دخوله مرة في ستيم بخيار «تذكرني».
+        كل لعبة تشتغل من «الحساب الأساسي» إذا يملكها، وإلا من الحساب اللي يملكها، وساحة تبدّل تلقائياً. Call of Duty ما تشتغل أبداً على الحساب المحظور. لازم كل حساب يكون مسجّل دخوله مرة في ستيم بخيار «تذكرني».
       </p>
       <div className="accounts">
         {steamAccounts.map((a) => {
           const owned = lib.games.filter((g) => g.ownerAccountId === a.id).length;
           const isBanned = banned.includes(a.id);
+          const isPrimary = primaryId === a.id;
           return (
             <div key={a.id} className={`acc glass ${isBanned ? "banned" : ""}`}>
               <div className="av">{a.displayName.slice(0, 1).toUpperCase()}</div>
               <div className="acc-info">
                 <b>
-                  {a.displayName} {a.active && <span className="tag ok">مسجّل الآن</span>}
+                  {a.displayName} {a.active && <span className="tag ok">مسجّل الآن</span>} {isPrimary && <span className="tag primary">★ الأساسي</span>}
                 </b>
                 <small className="en">{a.loginName} · {num(owned)} لعبة مثبتة</small>
               </div>
+              {!isPrimary && (
+                <button className="btn2 glass" onClick={() => saveSettings({ ...settings, primaryAccount: a.id }, { rescan: true })}>
+                  اجعله الأساسي
+                </button>
+              )}
               <label className="ban">
                 <span>محظور في Call of Duty</span>
                 <button className={`tg ${isBanned ? "on danger" : ""}`} onClick={() => toggleBanned(a.id)} aria-pressed={isBanned} />

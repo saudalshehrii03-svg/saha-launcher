@@ -116,6 +116,20 @@ fn play_stats(inst: &Install, accounts: &[Account]) -> HashMap<String, (u64, u64
     out
 }
 
+/// The main account: the user's choice, else the one owning the most games
+/// (Web API cache, or installed games' LastOwner when there is no cache).
+pub fn primary_account(settings: &settings::Settings, accounts: &[Account], games: &[Game]) -> Option<String> {
+    if accounts.iter().any(|a| a.id == settings.primary_account) {
+        return Some(settings.primary_account.clone());
+    }
+    let owned = crate::online::owned_cached();
+    let count = |id: &str| {
+        let api = owned.get(id).map(|v| v.len()).unwrap_or(0);
+        api * 1000 + games.iter().filter(|g| g.owner_account_id.as_deref() == Some(id)).count()
+    };
+    accounts.iter().max_by_key(|a| count(&a.id)).filter(|a| count(&a.id) > 0).map(|a| a.id.clone())
+}
+
 pub fn scan(inst: &Install, accounts: &[Account]) -> Vec<Game> {
     let settings = settings::load();
     let stats = play_stats(inst, accounts);
@@ -163,9 +177,13 @@ pub fn scan(inst: &Install, accounts: &[Account]) -> Vec<Game> {
         }
     }
 
-    // Owned but not installed (Steam Web API cache).
+    // Owned but not installed (Steam Web API cache). The main account goes first,
+    // so a game owned by both accounts belongs to it.
     let owned = crate::online::owned_cached();
-    for acc in accounts {
+    let primary = primary_account(&settings, accounts, &games);
+    let mut ordered: Vec<&Account> = accounts.iter().collect();
+    ordered.sort_by_key(|a| Some(&a.id) != primary.as_ref());
+    for acc in ordered {
         for o in owned.get(&acc.id).into_iter().flatten() {
             let appid = o.app_id.to_string();
             if let Some(g) = games.iter_mut().find(|g| g.app_id == appid) {
@@ -194,8 +212,18 @@ pub fn scan(inst: &Install, accounts: &[Account]) -> Vec<Game> {
         }
     }
 
+    // Anything the main account owns runs on it, even if another account installed it.
+    if let Some(p) = &primary {
+        let mine: std::collections::HashSet<String> =
+            owned.get(p).into_iter().flatten().map(|o| o.app_id.to_string()).collect();
+        for g in &mut games {
+            if mine.contains(&g.app_id) {
+                g.owner_account_id = Some(p.clone());
+            }
+        }
+    }
     for g in &mut games {
-        g.launch_account_id = rules::resolve(g, &settings, accounts).ok().flatten().map(|a| a.id.clone());
+        g.launch_account_id = rules::resolve(g, &settings, accounts, primary.as_deref()).ok().flatten().map(|a| a.id.clone());
     }
     games
 }
@@ -269,7 +297,9 @@ impl Steam {
     fn open_install(&self, game: &Game, progress: Progress) -> Result<()> {
         let Some(inst) = install() else { return msg("ستيم غير مثبت على الجهاز.") };
         let accounts = read_accounts(&inst);
-        if let Some(acc) = rules::resolve(game, &settings::load(), &accounts)? {
+        let settings = settings::load();
+        let primary = primary_account(&settings, &accounts, &[]);
+        if let Some(acc) = rules::resolve(game, &settings, &accounts, primary.as_deref())? {
             steam_switch::ensure_active(&inst, acc, progress)?;
         }
         progress("فتح نافذة التثبيت في ستيم…");
@@ -282,7 +312,8 @@ impl Steam {
         let Some(inst) = install() else { return msg("ستيم غير مثبت على الجهاز.") };
         let accounts = read_accounts(&inst);
         let settings = settings::load();
-        let target = rules::resolve(game, &settings, &accounts)?;
+        let primary = primary_account(&settings, &accounts, &[]);
+        let target = rules::resolve(game, &settings, &accounts, primary.as_deref())?;
 
         if let Some(acc) = target {
             steam_switch::ensure_active(&inst, acc, progress)?;

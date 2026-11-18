@@ -13,14 +13,15 @@ pub fn is_cod(title: &str) -> bool {
 }
 
 /// `Ok(None)` = launch on whatever account is signed in (no switch).
-pub fn resolve<'a>(game: &Game, settings: &Settings, accounts: &'a [Account]) -> Result<Option<&'a Account>> {
+/// `primary` (main account) is used when the owner is unknown (e.g. family-shared games).
+pub fn resolve<'a>(game: &Game, settings: &Settings, accounts: &'a [Account], primary: Option<&str>) -> Result<Option<&'a Account>> {
     let find = |id: &str| accounts.iter().find(|a| a.id == id);
     let pinned = settings.pinned_accounts.get(&game.key).and_then(|id| find(id));
     let owner = game.owner_account_id.as_deref().and_then(find);
     let target = pinned.or(owner);
 
     if !is_cod(&game.title) {
-        return Ok(target);
+        return Ok(target.or_else(|| primary.and_then(find)));
     }
 
     let banned = &settings.cod_banned_accounts;

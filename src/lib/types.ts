@@ -84,6 +84,8 @@ export interface Settings {
   pinnedAccounts: Record<string, string>;
   /** Steam accounts banned in Call of Duty. */
   codBannedAccounts: string[];
+  /** Main Steam account ("" = auto: the one owning the most games). */
+  primaryAccount: string;
   favorites: string[];
   hidden: string[];
   minimizeOnPlay: boolean;

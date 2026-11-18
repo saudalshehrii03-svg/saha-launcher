@@ -85,7 +85,7 @@ nav { display: flex; flex-direction: column; gap: 4px; }
 .gc:hover .poster, .gc.launching .poster { transform: translateY(-6px) scale(1.04); box-shadow: 0 0 0 2px var(--accent), 0 30px 50px -20px color-mix(in srgb, var(--accent) 50%, transparent); }
 .gc:hover .poster::after, .gc.launching .poster::after { opacity: 1; }
 .gc:hover .pb, .gc.launching .pb { opacity: 1; transform: scale(1); }
-.gc.dim .poster { filter: grayscale(0.85) brightness(0.6); }
+.gc.dim .poster { filter: none; }
 
 /* platforms */
 .lg { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }

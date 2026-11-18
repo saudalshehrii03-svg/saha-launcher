@@ -11,6 +11,7 @@ const EMPTY: Library = { platforms: [], accounts: [], games: [], art: {} };
 export const DEFAULT_SETTINGS: Settings = {
   pinnedAccounts: {},
   codBannedAccounts: [],
+  primaryAccount: "",
   favorites: [],
   hidden: [],
   minimizeOnPlay: true,
